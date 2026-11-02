@@ -78,8 +78,9 @@ html {
   input[type="date"] {
     color-scheme: dark;
   }
+  /* 系統下拉選單是白底，選項文字用深色 */
   select option {
-    color: #1c1d20;
+    color: var(--ink);
   }
 
   * {
