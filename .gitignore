@@ -5,3 +5,7 @@ next-env.d.ts
 *.tsbuildinfo
 .env*
 .DS_Store
+
+# Impeccable：執行檔缺少時會自動下載；hook 設定是個人設定，換電腦重跑 npx impeccable install
+.claude/skills/impeccable/scripts/bin/
+.claude/settings.local.json

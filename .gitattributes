@@ -1,0 +1,2 @@
+# Impeccable 的 shell 啟動腳本要維持 LF，否則 hook 在 bash 下會跑不起來
+.claude/skills/impeccable/scripts/impeccable text eol=lf
