@@ -66,18 +66,26 @@ export default function BottomBar({ tab, onTab, data }: { tab: Tab; onTab: (t: T
           </form>
         ) : (
           <nav className="flex w-full items-center pl-3 pr-2">
-            {TABS.map((t) => (
-              <button
-                key={t.key}
-                onClick={() => onTab(t.key)}
-                aria-current={tab === t.key ? "page" : undefined}
-                className={`flex h-[46px] flex-1 items-center justify-center font-[family-name:var(--font-garamond)] text-[12px] uppercase tracking-[0.16em] ${
-                  tab === t.key ? "underline decoration-1 underline-offset-[6px]" : ""
-                }`}
+            <div className="relative flex flex-1">
+              {TABS.map((t) => (
+                <button
+                  key={t.key}
+                  onClick={() => onTab(t.key)}
+                  aria-current={tab === t.key ? "page" : undefined}
+                  className="flex h-[46px] flex-1 items-center justify-center font-[family-name:var(--font-garamond)] text-[12px] uppercase tracking-[0.16em]"
+                >
+                  {t.label}
+                </button>
+              ))}
+              {/* 選中分頁下方的底線，切換時滑過去 */}
+              <span
+                aria-hidden
+                className="slide-indicator pointer-events-none absolute bottom-[9px] left-0 flex w-1/3 justify-center"
+                style={{ transform: `translateX(${TABS.findIndex((t) => t.key === tab) * 100}%)` }}
               >
-                {t.label}
-              </button>
-            ))}
+                <span className="h-px w-10 bg-fg" />
+              </span>
+            </div>
             <button
               onClick={() => setCapturing(true)}
               aria-label="記一件事"

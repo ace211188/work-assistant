@@ -57,28 +57,33 @@ export default function Today({ data, initialMode }: { data: AssistantData; init
         title={weekday}
         subtitle={monthDay}
         aside={
-          <div role="tablist" aria-label="早上或晚上" className="flex shrink-0 gap-1 pb-1">
+          <div role="tablist" aria-label="早上或晚上" className="relative grid shrink-0 grid-cols-2 pb-1">
             {(["morning", "evening"] as const).map((m) => (
-              <button
-                key={m}
-                role="tab"
-                aria-selected={mode === m}
-                onClick={() => setMode(m)}
-                className={`meta min-h-11 px-2 ${mode === m ? "underline decoration-1 underline-offset-[6px]" : ""}`}
-              >
+              <button key={m} role="tab" aria-selected={mode === m} onClick={() => setMode(m)} className="meta min-h-11 px-2">
                 {m === "morning" ? "Morning" : "Evening"}
               </button>
             ))}
+            <span
+              aria-hidden
+              className="slide-indicator pointer-events-none absolute bottom-[14px] left-0 flex w-1/2 justify-center"
+              style={{ transform: `translateX(${mode === "morning" ? 0 : 100}%)` }}
+            >
+              <span className="h-px w-12 bg-fg" />
+            </span>
           </div>
         }
       />
 
       {!loaded ? (
         <p className="meta py-16">Loading…</p>
-      ) : mode === "morning" ? (
-        <Morning brief={morning} thought={thought} direction={direction} events={events} data={data} />
       ) : (
-        <EveningReview brief={evening} data={data} onConfirmed={load} />
+        <div key={mode} className="view-enter">
+          {mode === "morning" ? (
+            <Morning brief={morning} thought={thought} direction={direction} events={events} data={data} />
+          ) : (
+            <EveningReview brief={evening} data={data} onConfirmed={load} />
+          )}
+        </div>
       )}
     </div>
   );

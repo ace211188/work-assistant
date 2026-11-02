@@ -46,9 +46,12 @@ export default function Home() {
 
   return (
     <div className="mx-auto max-w-xl px-5 pt-[max(20px,env(safe-area-inset-top))] pb-36">
-      {tab === "today" && <Today data={data} initialMode={todayMode} />}
-      {tab === "todos" && <Todos data={data} />}
-      {tab === "settings" && <Settings />}
+      {/* key 換了就重新播放淡入動畫 */}
+      <div key={tab} className="view-enter">
+        {tab === "today" && <Today data={data} initialMode={todayMode} />}
+        {tab === "todos" && <Todos data={data} />}
+        {tab === "settings" && <Settings />}
+      </div>
       <BottomBar tab={tab} onTab={setTab} data={data} />
     </div>
   );

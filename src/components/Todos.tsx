@@ -84,7 +84,7 @@ export default function Todos({ data }: { data: AssistantData }) {
         </div>
       )}
 
-      <div className="card divide-y divide-line py-1">
+      <div key={`${filter}-${category}`} className="view-enter card divide-y divide-line py-1">
         {list.map((t) => (
           <div key={t.id}>
             <TodoRow todo={t} onToggle={() => toggle(t)} onClick={() => setEditing(editing === t.id ? null : t.id)} />

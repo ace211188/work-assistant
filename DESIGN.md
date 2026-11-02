@@ -34,9 +34,10 @@ typography:
     fontWeight: 500
     letterSpacing: "0.3em"
   section:
-    fontFamily: "EB Garamond, serif"
-    fontSize: "16px"
-    fontWeight: 400
+    fontFamily: "EB Garamond, Noto Serif TC, serif"
+    fontSize: "20px"
+    fontWeight: 500
+    letterSpacing: "0.01em"
   title:
     fontFamily: "EB Garamond, Noto Serif TC, serif"
     fontSize: "19px"
@@ -150,14 +151,14 @@ components:
 
 整個 App 是一本每天換封面色的日系生活雜誌。打開時整個畫面是一片當天的霧色，左上角是斜體大字的英文星期當刊頭，下面一行大寫字距的日期；往下翻，先讀到「Thought of the day」，才是行程與最該先做的三件事。顏色本身就是日期：一週七種霧色，看一眼就知道今天星期幾。
 
-材質是平的紙：同色系提亮一階的卡片、6px 小圓角、不加陰影；層次靠卡片色階與一條半透明白細線，不靠投影。文字一律白色，英文與數字用 EB Garamond（刊頭、分段標題用真正的斜體），中文用思源宋體（明體），中文永遠保持正體。次要資訊靠縮小一號與斜體分層，不靠變淡。版面是單欄、手機優先，密度鬆，行高寬，像在讀雜誌而不是掃清單。
+材質是平的紙：同色系提亮一階的卡片、6px 小圓角、不加陰影；層次靠卡片色階與一條半透明白細線，不靠投影。文字一律白色，英文與數字用 EB Garamond（刊頭用真正的斜體，分段標題用正體），中文用思源宋體（明體），中文永遠保持正體。次要資訊靠縮小一號與斜體分層，不靠變淡。版面是單欄、手機優先，密度鬆，行高寬，像在讀雜誌而不是掃清單。
 
 唯一會「表演」的地方是底部浮起的工具列：按右下角的白色＋，整條工具列從＋的位置展開成輸入框。其他動作只有短促的按壓回饋。明確拒絕的預設：白底清單加圓形勾選框的待辦 App 外觀。
 
 **Key Characteristics:**
 - 每天一種霧色封面（`[data-day]`，0 = 週日），所有表面色都從當天的 `--bg` 推導。
 - 白字在卡片上至少 4.5:1；工具列上約 8:1。
-- EB Garamond 斜體刊頭與分段標題，思源宋體正體中文，`font-synthesis-style: none`。
+- EB Garamond 斜體刊頭、正體分段標題，思源宋體正體中文，`font-synthesis-style: none`。
 - 平面卡片：6px 圓角、沒有陰影；唯一的陰影屬於浮起的底部工具列。
 - 項目前面是 7px 小圓點，圓點本身就是完成鈕；自己的行程用當天的暖色點。
 - 一個招牌動畫（＋展開成輸入框），尊重減少動態效果設定。
@@ -205,7 +206,7 @@ components:
 ### Hierarchy
 - **Display**（400 斜體，50px，行高 1，字距 -0.01em）：刊頭的英文星期或頁名（`Tuesday`、`Tasks`、`Settings`、登入頁的 `Good day`）。
 - **Dateline**（500，13px，字距 0.3em，全大寫）：刊頭下方的日期或副標（`NOVEMBER 3`、`5 OPEN`），上距 8px。
-- **Section**（400 斜體，16px）：分段標題（`Thought of the day`、`Schedule`、`First three`），下面一條細線，上距 30px、下距 10px。
+- **Section**（500 正體，20px，字距 0.01em）：分段標題（`Thought of the day`、`Schedule`、`Done today`），下面一條細線，上距 30px、下距 10px。使用者要求分段標題不斜體、字大一點（2026-11-02）。
 - **Title**（600，19px，行高 1.6）：思考內容的標題。
 - **Question**（500，17px，行高 1.75）：思考題，左側一條 1px 白線引出。
 - **Body reading**（400，15px，行高 1.9）：可讀的段落：思考內文、問候語、晚上摘要、空狀態說明。
@@ -297,7 +298,7 @@ components:
 ### Masthead
 左對齊的斜體 Display 標題加一行 Dateline，右側可放切換或動作，三個主頁面與登入頁共用。
 
-**The One Flourish Rule.** 整個 App 只有一個招牌動畫：＋展開成輸入框。其他動態只限於按壓縮放（0.95–0.97）、收合箭頭旋轉、以及換日時封面色 600ms 的背景淡換；新功能不加入場、捲動或裝飾性動畫。
+**The One Flourish Rule.** 招牌動畫只有一個：＋展開成輸入框。另外，使用者要求「點選切換要有動畫」（2026-11-02），所以切換有一套固定的動態：分頁與早上／晚上的底線滑到選中那格（`.slide-indicator`，380ms），切換後的內容輕輕浮上來（`.view-enter`，380ms，從 15% 不透明、下移 10px 開始），兩者都用 `cubic-bezier(0.16, 1, 0.3, 1)`。其他動態只限於按壓縮放（0.95–0.97）、收合箭頭旋轉、以及換日時封面色 600ms 的背景淡換；新功能不另外加入場、捲動或裝飾性動畫，切換一律沿用這兩個 class。
 
 ## Do's and Don'ts
 
@@ -305,7 +306,7 @@ components:
 - **Do** 從當天的 `--bg` 推導所有表面色（卡片 88% 混白、墨 70% 混黑、工具列 80% 混黑），新元件用 `bg-card`、`text-ink`、`bg-bar`、`border-line` 這些語意色。
 - **Do** 新增封面色時先驗證白字在卡片色上 ≥ 4.5:1，不夠就調暗封面色，並同步更新 `globals.css` 的 `[data-day]` 與 `layout.tsx` 的 `DAY_COLORS`。
 - **Do** 用 13.5px 斜體 meta 表達次要資訊，文字顏色保持全白。
-- **Do** 刊頭與分段標題用 EB Garamond 斜體英文；中文內容用思源宋體正體。
+- **Do** 刊頭用 EB Garamond 斜體英文，分段標題用 EB Garamond 正體；中文內容用思源宋體正體。
 - **Do** 讓每個可點元素至少 44×44px，輸入框字級保持 16px。
 - **Do** 元素層級的預設樣式寫在 `@layer base`，元件類別寫在 `@layer components`，讓 Tailwind 工具類能覆蓋。
 - **Do** 數字（時間、日期、筆數）用 Garamond 等高等寬數字。
