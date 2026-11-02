@@ -6,9 +6,10 @@
 //
 // 動作（POST JSON）：
 //   { action: "config" }                       → 回傳 VAPID 公鑰
-//   { action: "subscribe", subscription }      → 保存這台裝置的訂閱
+//   { action: "subscribe", subscription }      → 保存這台裝置的訂閱（需登入，記在該使用者名下）
 //   { action: "test", endpoint }               → 只發一則測試通知給這台裝置
-// 第 0 階段沒有登入，所以只開放「通知自己這台裝置」，不開放群發。
+//   { action: "brief", brief_id }              → 早晚內容寫入時由資料庫觸發，通知擁有者的所有裝置
+// 群發只限「剛寫入、還沒通知過」的早晚內容，每則最多通知一次，所以不需要另外的密鑰。
 
 import "jsr:@supabase/functions-js/edge-runtime.d.ts";
 import { createClient } from "npm:@supabase/supabase-js@2";
@@ -42,18 +43,65 @@ Deno.serve(async (req) => {
     Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!,
   );
 
-  const { action, subscription, endpoint } = await req.json().catch(() => ({}));
+  const { action, subscription, endpoint, brief_id } = await req.json().catch(() => ({}));
 
   if (action === "config") return json({ vapidPublic });
 
   if (action === "subscribe") {
     if (!subscription?.endpoint) return json({ error: "缺少 subscription" }, 400);
+    const token = (req.headers.get("authorization") ?? "").replace(/^Bearer\s+/i, "");
+    const { data: auth } = await supabase.auth.getUser(token);
     const { error } = await supabase.from("pa_push_subscriptions").upsert({
       endpoint: subscription.endpoint,
       subscription,
+      user_id: auth.user?.id ?? null,
       user_agent: req.headers.get("user-agent"),
     });
     return error ? json({ error: error.message }, 500) : json({ ok: true });
+  }
+
+  if (action === "brief") {
+    const { data: brief } = await supabase
+      .from("pa_briefs")
+      .select("id, user_id, kind, content, notified_at, created_at")
+      .eq("id", brief_id ?? 0)
+      .maybeSingle();
+    if (!brief) return json({ error: "找不到這則內容" }, 404);
+    const fresh = Date.now() - new Date(brief.created_at).getTime() < 30 * 60 * 1000;
+    if (brief.notified_at || !fresh) return json({ ok: true, skipped: true });
+
+    // 先標記已通知，避免重複觸發時發兩次
+    const { data: claimed } = await supabase
+      .from("pa_briefs")
+      .update({ notified_at: new Date().toISOString() })
+      .eq("id", brief.id)
+      .is("notified_at", null)
+      .select("id");
+    if (!claimed?.length) return json({ ok: true, skipped: true });
+
+    const fallback = brief.kind === "morning"
+      ? { title: "早安 🌅", body: "今天的思考題和行程整理好了" }
+      : { title: "今天辛苦了 🌙", body: "回顧和明天的排程草稿好了，花 5 分鐘看看" };
+    const payload = JSON.stringify({ ...fallback, ...(brief.content?.push ?? {}) });
+
+    const { data: subs } = await supabase
+      .from("pa_push_subscriptions")
+      .select("endpoint, subscription")
+      .eq("user_id", brief.user_id);
+
+    let sent = 0;
+    for (const s of subs ?? []) {
+      try {
+        await webpush.sendNotification(s.subscription, payload);
+        sent++;
+      } catch (e) {
+        const status = (e as { statusCode?: number }).statusCode;
+        if (status === 404 || status === 410) {
+          await supabase.from("pa_push_subscriptions").delete().eq("endpoint", s.endpoint);
+        }
+      }
+    }
+    return json({ ok: true, sent });
   }
 
   if (action === "test") {

@@ -1,4 +1,4 @@
-// 個人助理 — Service Worker（第 0 階段：推播測試）
+// 個人助理 — Service Worker
 // 路徑一律用相對於 service worker 的位置，GitHub Pages 的子路徑也能用
 const HOME = new URL("./", self.location).href;
 

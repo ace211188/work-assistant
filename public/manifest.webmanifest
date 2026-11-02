@@ -1,0 +1,15 @@
+{
+  "name": "個人助理",
+  "short_name": "個人助理",
+  "description": "宇群的個人工作助理：先全局思考，再看待辦",
+  "start_url": "/work-assistant/",
+  "scope": "/work-assistant/",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#f6f3ee",
+  "theme_color": "#f6f3ee",
+  "icons": [
+    { "src": "/work-assistant/icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
+    { "src": "/work-assistant/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any" }
+  ]
+}

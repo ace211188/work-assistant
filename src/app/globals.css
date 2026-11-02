@@ -1,0 +1,52 @@
+@import "tailwindcss";
+
+:root {
+  --background: #f6f3ee;
+  --card: #ffffff;
+  --foreground: #2b2724;
+  --muted: #7a726a;
+  --line: #e6e0d8;
+  --accent: #b5523b;
+  --accent-soft: #f3e3dd;
+  --ok: #3d7a4f;
+  --warn: #b7791f;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --background: #1c1a18;
+    --card: #26231f;
+    --foreground: #eee8e1;
+    --muted: #a39a90;
+    --line: #3a3530;
+    --accent: #e07a5f;
+    --accent-soft: #3a2a24;
+    --ok: #7fbf8e;
+    --warn: #e0b060;
+  }
+}
+
+@theme inline {
+  --color-background: var(--background);
+  --color-card: var(--card);
+  --color-foreground: var(--foreground);
+  --color-muted: var(--muted);
+  --color-line: var(--line);
+  --color-accent: var(--accent);
+  --color-accent-soft: var(--accent-soft);
+  --color-ok: var(--ok);
+  --color-warn: var(--warn);
+}
+
+body {
+  background: var(--background);
+  color: var(--foreground);
+  font-family: -apple-system, "PingFang TC", "Noto Sans TC", "Microsoft JhengHei", system-ui, sans-serif;
+  -webkit-tap-highlight-color: transparent;
+}
+
+input,
+textarea,
+select {
+  font-size: 16px; /* iPhone 小於 16px 會自動放大畫面 */
+}
