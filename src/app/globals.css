@@ -7,7 +7,6 @@
   --dot: #ffe29a;
   --fg: #ffffff;
   --card: color-mix(in srgb, var(--bg) 88%, white);
-  --card-strong: color-mix(in srgb, var(--bg) 78%, white);
   --line: rgb(255 255 255 / 0.42);
   --ink: color-mix(in srgb, var(--bg) 70%, black);
   --bar: color-mix(in srgb, var(--bg) 80%, black);
@@ -24,7 +23,6 @@
   --color-bg: var(--bg);
   --color-fg: var(--fg);
   --color-card: var(--card);
-  --color-card-strong: var(--card-strong);
   --color-line: var(--line);
   --color-dot: var(--dot);
   --color-ink: var(--ink);

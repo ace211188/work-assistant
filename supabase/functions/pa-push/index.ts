@@ -90,6 +90,7 @@ Deno.serve(async (req) => {
       .eq("user_id", brief.user_id);
 
     let sent = 0;
+    const failures: string[] = [];
     for (const s of subs ?? []) {
       try {
         await webpush.sendNotification(s.subscription, payload);
@@ -99,8 +100,14 @@ Deno.serve(async (req) => {
         if (status === 404 || status === 410) {
           await supabase.from("pa_push_subscriptions").delete().eq("endpoint", s.endpoint);
         }
+        failures.push(`${status ?? ""} ${e instanceof Error ? e.message : String(e)}`.trim());
       }
     }
+    // 每次早晚通知都留一筆紀錄；一台都沒送到時一查就知道原因
+    const note = sent > 0
+      ? `${brief.kind} sent ${sent}`
+      : `${brief.kind} sent 0：${subs?.length ? failures.join("；") : "沒有綁定帳號的裝置"}`;
+    await supabase.from("pa_healthcheck").insert({ source: "push-brief", note });
     return json({ ok: true, sent });
   }
 
