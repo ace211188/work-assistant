@@ -1,12 +1,15 @@
 "use client";
 
 import { useCallback, useEffect, useState } from "react";
+import { IconX } from "@tabler/icons-react";
 import { supabase } from "@/lib/supabase";
 import { dateLabel, hhmm, taipeiDate, WEEKDAYS } from "@/lib/time";
 import { currentSubscription, enablePush, pushSupported, sendTestPush } from "@/lib/push";
 import type { Exception, Recurrence, WorkHour } from "@/lib/types";
+import Masthead from "./Masthead";
 
 const BYDAY = ["SU", "MO", "TU", "WE", "TH", "FR", "SA"];
+const WEEK_ORDER = [1, 2, 3, 4, 5, 6, 0];
 
 export function describeRule(rule: string) {
   const parts = Object.fromEntries(rule.split(";").map((p) => p.split("=")));
@@ -19,8 +22,25 @@ export function describeRule(rule: string) {
   return rule;
 }
 
-const card = "rounded-2xl border border-line bg-card p-4";
-const input = "rounded-lg border border-line bg-background px-2 py-1.5";
+// 星期多選：用在工作時段與重複待辦
+function DayPicker({ value, onChange }: { value: number[]; onChange: (v: number[]) => void }) {
+  return (
+    <div className="grid grid-cols-7 gap-1">
+      {WEEK_ORDER.map((d) => (
+        <button
+          type="button"
+          key={d}
+          aria-pressed={value.includes(d)}
+          aria-label={`週${WEEKDAYS[d]}`}
+          onClick={() => onChange(value.includes(d) ? value.filter((x) => x !== d) : [...value, d])}
+          className="btn-quiet h-11 px-0"
+        >
+          {WEEKDAYS[d]}
+        </button>
+      ))}
+    </div>
+  );
+}
 
 export default function Settings() {
   const [hours, setHours] = useState<WorkHour[]>([]);
@@ -54,16 +74,16 @@ export default function Settings() {
   }
 
   return (
-    <div className="space-y-5">
-      <h1 className="text-2xl font-bold">設定</h1>
+    <div>
+      <Masthead title="Settings" />
       <PushSection />
       <WorkHours hours={hours} onChange={load} onRemove={(id) => remove("pa_work_hours", id)} />
       <Exceptions list={exceptions} onChange={load} onRemove={(id) => remove("pa_exceptions", id)} />
       <Recurrences list={recurrences} onChange={load} onRemove={(id) => remove("pa_recurrences", id)} />
 
-      <section className={card}>
-        <h2 className="font-bold">我的方向</h2>
-        <p className="mt-1 text-xs text-muted">年度目標、序曲的願景、最近在意的問題。助理寫早上的思考內容時會參考。之後會由助理訪談你來補完。</p>
+      <h2 className="sec">My direction</h2>
+      <div className="card space-y-3">
+        <p className="meta leading-relaxed">年度目標、序曲的願景、最近在意的問題。早上的思考內容會參考這裡；之後會由助理訪談你來補完。</p>
         <textarea
           value={direction}
           onChange={(e) => {
@@ -71,22 +91,25 @@ export default function Settings() {
             setDirectionSaved(false);
           }}
           rows={6}
-          className="mt-2 w-full rounded-xl border border-line bg-background px-3 py-2 outline-none focus:border-accent"
+          aria-label="我的方向"
+          className="field leading-[1.8]"
         />
-        <button
-          onClick={async () => {
-            if (!direction.trim()) return;
-            await supabase.from("pa_direction").insert({ content: direction.trim() });
-            setDirectionSaved(true);
-          }}
-          className="mt-2 rounded-lg bg-accent px-4 py-1.5 text-sm text-white"
-        >
-          儲存
-        </button>
-        {directionSaved && <span className="ml-2 text-sm text-ok">已儲存 ✓</span>}
-      </section>
+        <div className="flex items-center gap-3">
+          <button
+            onClick={async () => {
+              if (!direction.trim()) return;
+              await supabase.from("pa_direction").insert({ content: direction.trim() });
+              setDirectionSaved(true);
+            }}
+            className="btn"
+          >
+            儲存
+          </button>
+          {directionSaved && <span className="meta">已儲存</span>}
+        </div>
+      </div>
 
-      <button onClick={() => supabase.auth.signOut()} className="text-sm text-muted underline">
+      <button onClick={() => supabase.auth.signOut()} className="btn-quiet mt-8">
         登出
       </button>
     </div>
@@ -94,7 +117,7 @@ export default function Settings() {
 }
 
 function PushSection() {
-  const [status, setStatus] = useState<string>("");
+  const [status, setStatus] = useState("");
   const [enabled, setEnabled] = useState(false);
 
   useEffect(() => {
@@ -107,79 +130,97 @@ function PushSection() {
       const result = await enablePush();
       if (result === "ok") {
         setEnabled(true);
-        setStatus("通知已開啟 ✓");
+        setStatus("通知已開啟。");
       } else if (result === "denied") setStatus("你沒有允許通知，可以到 iPhone 設定 → 通知 → 個人助理 打開。");
       else setStatus("請從主畫面的圖示打開 App，才能開啟通知。");
     } catch (e) {
-      setStatus(`失敗：${e instanceof Error ? e.message : e}`);
+      setStatus(`開啟失敗：${e instanceof Error ? e.message : e}。請稍後再試一次。`);
     }
   }
 
   return (
-    <section className={card}>
-      <h2 className="font-bold">通知</h2>
-      <p className="mt-1 text-xs text-muted">早上 7 點和晚上 10 點，內容準備好時通知你。</p>
-      <div className="mt-2 flex gap-2">
-        <button onClick={enable} disabled={!pushSupported()} className="rounded-lg bg-accent px-4 py-1.5 text-sm text-white disabled:opacity-40">
-          {enabled ? "重新綁定這台裝置" : "開啟通知"}
-        </button>
-        {enabled && (
-          <button
-            onClick={() => sendTestPush().then(() => setStatus("已送出測試通知 ✓")).catch((e) => setStatus(`失敗：${e.message}`))}
-            className="rounded-lg border border-line px-3 py-1.5 text-sm"
-          >
-            傳測試通知
+    <>
+      <h2 className="sec">Notifications</h2>
+      <div className="card space-y-3">
+        <p className="leading-relaxed">早上 7 點和晚上 10 點，內容準備好時通知你。</p>
+        <div className="flex flex-wrap gap-2">
+          <button onClick={enable} disabled={!pushSupported()} className="btn">
+            {enabled ? "重新綁定這台裝置" : "開啟通知"}
           </button>
-        )}
+          {enabled && (
+            <button
+              onClick={() => sendTestPush().then(() => setStatus("已送出測試通知。")).catch((e) => setStatus(`測試失敗：${e.message}`))}
+              className="btn-quiet"
+            >
+              傳測試通知
+            </button>
+          )}
+        </div>
+        {status && <p className="meta">{status}</p>}
       </div>
-      {status && <p className="mt-2 text-sm text-muted">{status}</p>}
-    </section>
+    </>
   );
 }
 
+// 工作時段：可以一次選好幾天、套用同一段時間
 function WorkHours({ hours, onChange, onRemove }: { hours: WorkHour[]; onChange: () => void; onRemove: (id: number) => void }) {
-  const [form, setForm] = useState({ weekday: 1, start: "13:00", end: "21:00" });
+  const [days, setDays] = useState<number[]>([]);
+  const [start, setStart] = useState("13:00");
+  const [end, setEnd] = useState("21:00");
+  const [error, setError] = useState("");
 
   async function add(e: React.FormEvent) {
     e.preventDefault();
-    if (form.end <= form.start) return;
-    await supabase.from("pa_work_hours").insert({ weekday: form.weekday, start_time: form.start, end_time: form.end });
+    if (days.length === 0) return setError("先選要套用的星期。");
+    if (end <= start) return setError("結束時間要晚於開始時間。");
+    setError("");
+    await supabase.from("pa_work_hours").insert(days.map((d) => ({ weekday: d, start_time: start, end_time: end })));
+    setDays([]);
     onChange();
   }
 
   return (
-    <section className={card}>
-      <h2 className="font-bold">每週工作時段</h2>
-      <p className="mt-1 text-xs text-muted">這些時段的空檔算「可工作」，其他時間都算休息。同一天可以有好幾段。</p>
-      <div className="mt-2 space-y-1 text-sm">
-        {[1, 2, 3, 4, 5, 6, 0].map((d) => {
-          const list = hours.filter((h) => h.weekday === d);
-          return (
-            <div key={d} className="flex flex-wrap items-center gap-1.5">
-              <span className="w-10 text-muted">週{WEEKDAYS[d]}</span>
-              {list.length === 0 && <span className="text-xs text-muted">休息</span>}
-              {list.map((h) => (
-                <span key={h.id} className="rounded-full bg-ok/15 px-2 py-0.5 text-ok">
-                  {hhmm(h.start_time)}–{hhmm(h.end_time)}
-                  <button onClick={() => onRemove(h.id)} className="ml-1 text-muted" aria-label="刪除">✕</button>
-                </span>
-              ))}
-            </div>
-          );
-        })}
+    <>
+      <h2 className="sec">Working hours</h2>
+      <div className="card">
+        <p className="meta leading-relaxed">這些時段的空檔算「可以工作」，其他時間都算休息。同一天可以有好幾段。</p>
+        <ul className="mt-2 divide-y divide-line">
+          {WEEK_ORDER.map((d) => {
+            const list = hours.filter((h) => h.weekday === d);
+            return (
+              <li key={d} className="flex min-h-11 flex-wrap items-center gap-x-3 gap-y-1 py-1">
+                <span className="w-10 shrink-0">週{WEEKDAYS[d]}</span>
+                {list.length === 0 && <span className="meta">Day off</span>}
+                {list.map((h) => (
+                  <span key={h.id} className="num inline-flex items-center text-[15px]">
+                    {hhmm(h.start_time)} – {hhmm(h.end_time)}
+                    <button onClick={() => onRemove(h.id)} aria-label={`刪除週${WEEKDAYS[d]} ${hhmm(h.start_time)} 這段`} className="flex h-11 w-11 items-center justify-center">
+                      <IconX size={15} stroke={1.6} />
+                    </button>
+                  </span>
+                ))}
+              </li>
+            );
+          })}
+        </ul>
+        <form onSubmit={add} className="mt-3 space-y-3 border-t border-line pt-4">
+          <div className="flex flex-wrap items-center gap-2">
+            <span className="meta mr-1">快速選</span>
+            <button type="button" onClick={() => setDays([1, 2, 3, 4, 5])} className="btn-quiet text-[14px]">平日</button>
+            <button type="button" onClick={() => setDays([6, 0])} className="btn-quiet text-[14px]">週末</button>
+            <button type="button" onClick={() => setDays([0, 1, 2, 3, 4, 5, 6])} className="btn-quiet text-[14px]">每天</button>
+          </div>
+          <DayPicker value={days} onChange={setDays} />
+          <div className="num flex items-center gap-2">
+            <input type="time" value={start} onChange={(e) => setStart(e.target.value)} aria-label="開始時間" className="field w-auto" />
+            <span>–</span>
+            <input type="time" value={end} onChange={(e) => setEnd(e.target.value)} aria-label="結束時間" className="field w-auto" />
+          </div>
+          <button className="btn w-full">{days.length > 0 ? `加到 ${days.length} 天` : "加入時段"}</button>
+          {error && <p className="meta">{error}</p>}
+        </form>
       </div>
-      <form onSubmit={add} className="mt-3 flex flex-wrap items-center gap-2 text-sm">
-        <select value={form.weekday} onChange={(e) => setForm({ ...form, weekday: Number(e.target.value) })} className={input}>
-          {[1, 2, 3, 4, 5, 6, 0].map((d) => (
-            <option key={d} value={d}>週{WEEKDAYS[d]}</option>
-          ))}
-        </select>
-        <input type="time" value={form.start} onChange={(e) => setForm({ ...form, start: e.target.value })} className={input} />
-        <span>–</span>
-        <input type="time" value={form.end} onChange={(e) => setForm({ ...form, end: e.target.value })} className={input} />
-        <button className="rounded-lg bg-accent px-3 py-1.5 text-white">加入</button>
-      </form>
-    </section>
+    </>
   );
 }
 
@@ -200,34 +241,44 @@ function Exceptions({ list, onChange, onRemove }: { list: Exception[]; onChange:
   }
 
   return (
-    <section className={card}>
-      <h2 className="font-bold">例外（休假、加班、私人行程）</h2>
-      <ul className="mt-2 space-y-1 text-sm">
-        {list.map((x) => (
-          <li key={x.id} className="flex items-center gap-2">
-            <span className={x.kind === "rest" ? "text-muted" : "text-ok"}>{x.kind === "rest" ? "休息" : "工作"}</span>
-            <span>{dateLabel(x.date)}</span>
-            <span className="text-muted">{x.start_time ? `${hhmm(x.start_time)}–${hhmm(x.end_time)}` : "整天"}</span>
-            <span className="min-w-0 flex-1 truncate">{x.note}</span>
-            <button onClick={() => onRemove(x.id)} className="text-muted" aria-label="刪除">✕</button>
-          </li>
-        ))}
-        {list.length === 0 && <li className="text-xs text-muted">目前沒有例外。</li>}
-      </ul>
-      <form onSubmit={add} className="mt-3 flex flex-wrap items-center gap-2 text-sm">
-        <input type="date" value={form.date} onChange={(e) => setForm({ ...form, date: e.target.value })} className={input} />
-        <select value={form.kind} onChange={(e) => setForm({ ...form, kind: e.target.value as "rest" | "work" })} className={input}>
-          <option value="rest">休息</option>
-          <option value="work">工作</option>
-        </select>
-        <input type="time" value={form.start} onChange={(e) => setForm({ ...form, start: e.target.value })} className={input} />
-        <span>–</span>
-        <input type="time" value={form.end} onChange={(e) => setForm({ ...form, end: e.target.value })} className={input} />
-        <input placeholder="備註" value={form.note} onChange={(e) => setForm({ ...form, note: e.target.value })} className={`${input} min-w-0 flex-1`} />
-        <button className="rounded-lg bg-accent px-3 py-1.5 text-white">加入</button>
-      </form>
-      <p className="mt-1 text-xs text-muted">時間留空代表整天。</p>
-    </section>
+    <>
+      <h2 className="sec">Exceptions</h2>
+      <div className="card">
+        <p className="meta leading-relaxed">休假、加班、私人行程。時間留空代表整天。</p>
+        <ul className="mt-2 divide-y divide-line">
+          {list.map((x) => (
+            <li key={x.id} className="flex min-h-11 items-center gap-3">
+              <span>{x.kind === "rest" ? "休息" : "工作"}</span>
+              <span>{dateLabel(x.date)}</span>
+              <span className="num text-[15px]">{x.start_time ? `${hhmm(x.start_time)} – ${hhmm(x.end_time)}` : "All day"}</span>
+              <span className="meta min-w-0 flex-1 truncate">{x.note}</span>
+              <button onClick={() => onRemove(x.id)} aria-label="刪除這個例外" className="flex h-11 w-11 items-center justify-center">
+                <IconX size={15} stroke={1.6} />
+              </button>
+            </li>
+          ))}
+          {list.length === 0 && <li className="meta py-2">目前沒有例外。</li>}
+        </ul>
+        <form onSubmit={add} className="mt-3 space-y-3 border-t border-line pt-4">
+          <div className="flex gap-2">
+            <input type="date" value={form.date} onChange={(e) => setForm({ ...form, date: e.target.value })} aria-label="日期" className="field" />
+            <select value={form.kind} onChange={(e) => setForm({ ...form, kind: e.target.value as "rest" | "work" })} aria-label="休息或工作" className="field w-28">
+              <option value="rest">休息</option>
+              <option value="work">工作</option>
+            </select>
+          </div>
+          <div className="num flex items-center gap-2">
+            <input type="time" value={form.start} onChange={(e) => setForm({ ...form, start: e.target.value })} aria-label="開始時間" className="field w-auto" />
+            <span>–</span>
+            <input type="time" value={form.end} onChange={(e) => setForm({ ...form, end: e.target.value })} aria-label="結束時間" className="field w-auto" />
+          </div>
+          <div className="flex gap-2">
+            <input placeholder="備註" value={form.note} onChange={(e) => setForm({ ...form, note: e.target.value })} aria-label="備註" className="field min-w-0 flex-1" />
+            <button className="btn shrink-0">加入</button>
+          </div>
+        </form>
+      </div>
+    </>
   );
 }
 
@@ -249,49 +300,41 @@ function Recurrences({ list, onChange, onRemove }: { list: Recurrence[]; onChang
   }
 
   return (
-    <section className={card}>
-      <h2 className="font-bold">重複待辦</h2>
-      <p className="mt-1 text-xs text-muted">時間到了，早上排程會自動把它放進當天的待辦。</p>
-      <ul className="mt-2 space-y-1 text-sm">
-        {list.map((r) => (
-          <li key={r.id} className="flex items-center gap-2">
-            <span className="text-muted">{describeRule(r.rule)}</span>
-            <span className="min-w-0 flex-1 truncate">{r.title}</span>
-            <button onClick={() => onRemove(r.id)} className="text-muted" aria-label="刪除">✕</button>
-          </li>
-        ))}
-        {list.length === 0 && <li className="text-xs text-muted">例如：每月 5 號繳房租、每週一確認排課。</li>}
-      </ul>
-      <form onSubmit={add} className="mt-3 space-y-2 text-sm">
-        <input placeholder="要做什麼" value={form.title} onChange={(e) => setForm({ ...form, title: e.target.value })} className={`${input} w-full`} />
-        <div className="flex flex-wrap items-center gap-2">
-          <select value={form.freq} onChange={(e) => setForm({ ...form, freq: e.target.value })} className={input}>
-            <option value="DAILY">每天</option>
-            <option value="WEEKLY">每週</option>
-            <option value="MONTHLY">每月</option>
-          </select>
-          {form.freq === "WEEKLY" &&
-            [1, 2, 3, 4, 5, 6, 0].map((d) => (
-              <button
-                type="button"
-                key={d}
-                onClick={() =>
-                  setForm({ ...form, days: form.days.includes(d) ? form.days.filter((x) => x !== d) : [...form.days, d] })
-                }
-                className={`h-8 w-8 rounded-full ${form.days.includes(d) ? "bg-accent text-white" : "border border-line"}`}
-              >
-                {WEEKDAYS[d]}
+    <>
+      <h2 className="sec">Repeating tasks</h2>
+      <div className="card">
+        <p className="meta leading-relaxed">時間到了，早上整理時會自動放進當天的待辦。</p>
+        <ul className="mt-2 divide-y divide-line">
+          {list.map((r) => (
+            <li key={r.id} className="flex min-h-11 items-center gap-3">
+              <span className="meta shrink-0">{describeRule(r.rule)}</span>
+              <span className="min-w-0 flex-1 truncate">{r.title}</span>
+              <button onClick={() => onRemove(r.id)} aria-label={`刪除重複待辦「${r.title}」`} className="flex h-11 w-11 items-center justify-center">
+                <IconX size={15} stroke={1.6} />
               </button>
-            ))}
-          {form.freq === "MONTHLY" && (
-            <>
-              <input type="number" min={1} max={31} value={form.monthday} onChange={(e) => setForm({ ...form, monthday: Number(e.target.value) })} className={`${input} w-16`} />
-              <span>號</span>
-            </>
-          )}
-          <button className="ml-auto rounded-lg bg-accent px-3 py-1.5 text-white">加入</button>
-        </div>
-      </form>
-    </section>
+            </li>
+          ))}
+          {list.length === 0 && <li className="meta py-2">例如：每月 5 號繳房租、每週一確認排課。</li>}
+        </ul>
+        <form onSubmit={add} className="mt-3 space-y-3 border-t border-line pt-4">
+          <input placeholder="要做什麼" value={form.title} onChange={(e) => setForm({ ...form, title: e.target.value })} aria-label="要做什麼" className="field" />
+          <div className="flex gap-2">
+            <select value={form.freq} onChange={(e) => setForm({ ...form, freq: e.target.value })} aria-label="頻率" className="field w-28">
+              <option value="DAILY">每天</option>
+              <option value="WEEKLY">每週</option>
+              <option value="MONTHLY">每月</option>
+            </select>
+            {form.freq === "MONTHLY" && (
+              <label className="num flex items-center gap-2">
+                <input type="number" min={1} max={31} value={form.monthday} onChange={(e) => setForm({ ...form, monthday: Number(e.target.value) })} aria-label="每月幾號" className="field w-20" />
+                號
+              </label>
+            )}
+          </div>
+          {form.freq === "WEEKLY" && <DayPicker value={form.days} onChange={(days) => setForm({ ...form, days })} />}
+          <button className="btn w-full">加入重複待辦</button>
+        </form>
+      </div>
+    </>
   );
 }

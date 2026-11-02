@@ -1,15 +1,17 @@
 "use client";
 
 import { useCallback, useEffect, useState } from "react";
+import { IconChevronDown } from "@tabler/icons-react";
 import { supabase } from "@/lib/supabase";
-import { dateLabel, dayRange, hhmm, taipeiDate, taipeiHour } from "@/lib/time";
+import { dayRange, hhmm, taipeiDate, taipeiHour } from "@/lib/time";
 import { sortByUrgency, type AssistantData } from "@/lib/useData";
 import type { Brief, CalendarEvent, EveningContent, MorningContent, Thought, Todo } from "@/lib/types";
+import Masthead, { englishDate } from "./Masthead";
 import ThoughtCard from "./ThoughtCard";
 import TodoRow from "./TodoRow";
 import EveningReview from "./EveningReview";
 
-export default function Today({ data }: { data: AssistantData }) {
+export default function Today({ data, initialMode }: { data: AssistantData; initialMode?: "morning" | "evening" }) {
   const today = taipeiDate();
   const [morning, setMorning] = useState<Brief<MorningContent> | null>(null);
   const [evening, setEvening] = useState<Brief<EveningContent> | null>(null);
@@ -17,7 +19,7 @@ export default function Today({ data }: { data: AssistantData }) {
   const [direction, setDirection] = useState<string | null>(null);
   const [events, setEvents] = useState<CalendarEvent[]>([]);
   const [loaded, setLoaded] = useState(false);
-  const [mode, setMode] = useState<"morning" | "evening">(taipeiHour() >= 21 ? "evening" : "morning");
+  const [mode, setMode] = useState<"morning" | "evening">(initialMode ?? (taipeiHour() >= 21 ? "evening" : "morning"));
 
   const load = useCallback(async () => {
     const { from, to } = dayRange(today);
@@ -37,9 +39,9 @@ export default function Today({ data }: { data: AssistantData }) {
       const { data: th } = await supabase.from("pa_thoughts").select("*").eq("id", m.content.thought_id).maybeSingle();
       setThought((th as Thought) ?? null);
     }
-    if (ev?.status === "draft") setMode("evening");
+    if (!initialMode && ev?.status === "draft" && taipeiHour() >= 21) setMode("evening");
     setLoaded(true);
-  }, [today]);
+  }, [today, initialMode]);
 
   useEffect(() => {
     // 載入今天的早晚內容（非同步，結果回來才更新狀態）
@@ -47,29 +49,33 @@ export default function Today({ data }: { data: AssistantData }) {
     load();
   }, [load]);
 
-  if (!loaded) return <p className="py-20 text-center text-muted">載入中…</p>;
+  const { weekday, monthDay } = englishDate(today);
 
   return (
-    <div className="space-y-5">
-      <header className="flex items-end justify-between">
-        <div>
-          <div className="text-sm text-muted">{dateLabel(today)}・{today}</div>
-          <h1 className="text-2xl font-bold">{mode === "morning" ? "早安，宇群" : "今天辛苦了"}</h1>
-        </div>
-        <div className="flex rounded-full border border-line bg-card p-0.5 text-sm">
-          {(["morning", "evening"] as const).map((m) => (
-            <button
-              key={m}
-              onClick={() => setMode(m)}
-              className={`rounded-full px-3 py-1 ${mode === m ? "bg-accent text-white" : "text-muted"}`}
-            >
-              {m === "morning" ? "早上" : "晚上"}
-            </button>
-          ))}
-        </div>
-      </header>
+    <div>
+      <Masthead
+        title={weekday}
+        subtitle={monthDay}
+        aside={
+          <div role="tablist" aria-label="早上或晚上" className="flex shrink-0 gap-1 pb-1">
+            {(["morning", "evening"] as const).map((m) => (
+              <button
+                key={m}
+                role="tab"
+                aria-selected={mode === m}
+                onClick={() => setMode(m)}
+                className={`meta min-h-11 px-2 ${mode === m ? "underline decoration-1 underline-offset-[6px]" : ""}`}
+              >
+                {m === "morning" ? "Morning" : "Evening"}
+              </button>
+            ))}
+          </div>
+        }
+      />
 
-      {mode === "morning" ? (
+      {!loaded ? (
+        <p className="meta py-16">Loading…</p>
+      ) : mode === "morning" ? (
         <Morning brief={morning} thought={thought} direction={direction} events={events} data={data} />
       ) : (
         <EveningReview brief={evening} data={data} onConfirmed={load} />
@@ -104,97 +110,87 @@ function Morning({
 
   return (
     <>
-      {c.greeting && <p className="leading-relaxed">{c.greeting}</p>}
+      {c.greeting && <p className="mt-5 text-[15px] leading-[1.9]">{c.greeting}</p>}
 
+      <h2 className="sec">Thought of the day</h2>
       {thought ? (
         <ThoughtCard thought={thought} direction={direction} />
       ) : (
-        <section className="rounded-2xl border border-dashed border-line p-5 text-sm text-muted">
+        <p className="card text-[15px] leading-[1.9]">
           {brief ? "今天沒有思考內容。" : "每天早上 7 點，這裡會先出現一則讓你從全局思考的內容，再來才是待辦。"}
-        </section>
+        </p>
       )}
 
       <Schedule events={events} slots={c.free_slots} />
 
-      <section>
-        <h2 className="mb-1 font-bold">今天建議先做</h2>
-        {top.length > 0 ? (
-          <div className="divide-y divide-line rounded-2xl border border-line bg-card px-4">
-            {top.map((x) => (
-              <TodoRow
-                key={x.todo_id}
-                todo={x.todo!}
-                onToggle={() => toggle(x.todo!)}
-                extra={
-                  (x.slot || x.reason) && (
-                    <div className="mt-1 text-xs text-muted">
-                      {x.slot && <span className="mr-2 text-accent">🕐 {x.slot}</span>}
-                      {x.reason}
-                    </div>
-                  )
-                }
-              />
-            ))}
-          </div>
-        ) : (
-          <p className="text-sm text-muted">早上排程跑過後，助理會挑出最該先做的 3 件事。</p>
-        )}
-      </section>
+      <h2 className="sec">First three</h2>
+      {top.length > 0 ? (
+        <div className="card divide-y divide-line py-1">
+          {top.map((x) => (
+            <TodoRow
+              key={x.todo_id}
+              todo={x.todo!}
+              onToggle={() => toggle(x.todo!)}
+              time={x.slot ? "" : undefined}
+              extra={
+                (x.slot || x.reason) && (
+                  <p className="meta mt-1 leading-relaxed">
+                    {x.slot && <span className="num not-italic">{x.slot}　</span>}
+                    {x.reason}
+                  </p>
+                )
+              }
+            />
+          ))}
+        </div>
+      ) : (
+        <p className="card text-[15px] leading-[1.9]">早上整理過後，助理會挑出今天最該先做的三件事。</p>
+      )}
 
       {stale.length > 0 && (
-        <section className="space-y-2">
-          {stale.map((x) => (
-            <div key={x.todo_id} className="rounded-2xl bg-accent-soft p-4 text-sm">
-              <p>{x.message}</p>
-              <div className="mt-2 flex gap-2">
-                <button
-                  onClick={() => data.updateTodo(x.todo_id, { planned_date: today })}
-                  className="rounded-lg bg-card px-3 py-1.5"
-                >
-                  今天做
-                </button>
-                <button
-                  onClick={() => data.updateTodo(x.todo_id, { status: "done" })}
-                  className="rounded-lg bg-card px-3 py-1.5"
-                >
-                  已經做完
-                </button>
-                <button
-                  onClick={() => data.updateTodo(x.todo_id, { status: "dropped" })}
-                  className="rounded-lg bg-card px-3 py-1.5"
-                >
-                  不做了
-                </button>
+        <>
+          <h2 className="sec">Worth another look</h2>
+          <div className="space-y-2">
+            {stale.map((x) => (
+              <div key={x.todo_id} className="card">
+                <p className="leading-[1.8]">{x.message}</p>
+                <div className="mt-3 flex flex-wrap gap-2">
+                  <button onClick={() => data.updateTodo(x.todo_id, { planned_date: today })} className="btn-quiet">今天做</button>
+                  <button onClick={() => data.updateTodo(x.todo_id, { status: "done" })} className="btn-quiet">已經做完</button>
+                  <button onClick={() => data.updateTodo(x.todo_id, { status: "dropped" })} className="btn-quiet">不做了</button>
+                </div>
               </div>
-            </div>
-          ))}
-        </section>
+            ))}
+          </div>
+        </>
       )}
 
       {(c.ideas?.length ?? 0) > 0 && (
-        <section>
-          <h2 className="mb-1 font-bold">你記下的想法</h2>
-          <ul className="space-y-1 text-sm">
+        <>
+          <h2 className="sec">Notes to self</h2>
+          <ul className="card space-y-2 leading-[1.8]">
             {c.ideas!.map((i) => (
-              <li key={i.inbox_id} className="rounded-xl bg-card px-4 py-2">💡 {i.text}</li>
+              <li key={i.inbox_id}>{i.text}</li>
             ))}
           </ul>
-        </section>
+        </>
       )}
 
-      <section>
-        <button onClick={() => setShowOthers((v) => !v)} className="font-bold">
-          其他待辦（{others.length}）{showOthers ? "▴" : "▾"}
-        </button>
-        {showOthers && (
-          <div className="mt-1 divide-y divide-line rounded-2xl border border-line bg-card px-4">
-            {others.map((t) => (
-              <TodoRow key={t.id} todo={t} onToggle={() => toggle(t)} />
-            ))}
-            {others.length === 0 && <p className="py-3 text-sm text-muted">沒有其他待辦 🎉</p>}
-          </div>
-        )}
-      </section>
+      <button onClick={() => setShowOthers((v) => !v)} aria-expanded={showOthers} className="sec w-full text-left">
+        <span>Everything else</span>
+        <span className="num inline-flex items-center gap-1 not-italic">
+          {others.length}
+          <IconChevronDown size={16} stroke={1.6} className={`transition-transform ${showOthers ? "rotate-180" : ""}`} />
+        </span>
+      </button>
+      {showOthers && (
+        <div className="card divide-y divide-line py-1">
+          {others.map((t) => (
+            <TodoRow key={t.id} todo={t} onToggle={() => toggle(t)} />
+          ))}
+          {others.length === 0 && <p className="py-3">沒有其他待辦了。</p>}
+        </div>
+      )}
     </>
   );
 }
@@ -213,50 +209,46 @@ function Schedule({ events, slots }: { events: CalendarEvent[]; slots?: MorningC
   }
 
   const row = (e: CalendarEvent, isMine: boolean) => (
-    <div key={e.id} className="flex items-center gap-3 py-2 text-sm">
-      <span className="w-24 shrink-0 text-muted tabular-nums">
-        {e.all_day ? "整天" : `${hhmm(e.start_at)}–${hhmm(e.end_at)}`}
-      </span>
-      <span className="min-w-0 flex-1 truncate">
-        {e.title}
-        {e.calendar_name && <span className="ml-1 text-xs text-muted">・{e.calendar_name}</span>}
-      </span>
-      <button onClick={() => setMine(e, !isMine)} className="shrink-0 text-xs text-muted underline">
+    <div key={e.id} className="flex items-center gap-3">
+      <span className={`h-[7px] w-[7px] shrink-0 rounded-full ${isMine ? "bg-dot" : "border border-fg"}`} />
+      <div className="min-w-0 flex-1 py-[10px]">
+        <div className="leading-snug">{e.title}</div>
+        <div className="meta leading-snug">
+          <span className="num not-italic">{e.all_day ? "All day" : `${hhmm(e.start_at)} – ${hhmm(e.end_at)}`}</span>
+          {e.calendar_name && `　${e.calendar_name}`}
+        </div>
+      </div>
+      <button onClick={() => setMine(e, !isMine)} className="meta min-h-11 shrink-0 underline underline-offset-4">
         {isMine ? "不是我的" : "是我的"}
       </button>
     </div>
   );
 
   return (
-    <section>
-      <h2 className="mb-1 font-bold">今天行程</h2>
-      <div className="rounded-2xl border border-line bg-card px-4 py-1">
+    <>
+      <h2 className="sec">Schedule</h2>
+      <div className="card py-1">
         {myEvents.length > 0 ? (
           <div className="divide-y divide-line">{myEvents.map((e) => row(e, true))}</div>
         ) : (
-          <p className="py-2 text-sm text-muted">行事曆上今天沒有你的行程。</p>
+          <p className="py-3">行事曆上今天沒有你的行程。</p>
         )}
-        {slots && slots.length > 0 && (
-          <div className="flex flex-wrap gap-1.5 border-t border-line py-2">
-            {slots.map((s, i) => (
-              <span
-                key={i}
-                className={`rounded-full px-2.5 py-1 text-xs ${s.kind === "work" ? "bg-ok/15 text-ok" : "bg-line text-muted"}`}
-              >
-                {s.start}–{s.end} {s.kind === "work" ? "可工作" : "休息"}
-              </span>
-            ))}
-          </div>
+        {slots && slots.some((s) => s.kind === "work") && (
+          <p className="num border-t border-line py-3 text-[15px]">
+            <span className="meta mr-2">Open time</span>
+            {slots.filter((s) => s.kind === "work").map((s) => `${s.start} – ${s.end}`).join("、")}
+          </p>
         )}
         {classroom.length > 0 && (
-          <div className="border-t border-line py-2">
-            <button onClick={() => setShowClassroom((v) => !v)} className="text-sm text-muted">
-              教室其他行程 {classroom.length} 筆 {showClassroom ? "▴" : "▾"}
+          <div className="border-t border-line">
+            <button onClick={() => setShowClassroom((v) => !v)} aria-expanded={showClassroom} className="flex min-h-11 w-full items-center justify-between">
+              <span>教室其他行程 <span className="num">{classroom.length}</span> 筆</span>
+              <IconChevronDown size={16} stroke={1.6} className={`transition-transform ${showClassroom ? "rotate-180" : ""}`} />
             </button>
             {showClassroom && <div className="divide-y divide-line">{classroom.map((e) => row(e, false))}</div>}
           </div>
         )}
       </div>
-    </section>
+    </>
   );
 }

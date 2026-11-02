@@ -1,0 +1,699 @@
+{
+  "schemaVersion": 2,
+  "generatedAt": "2026-11-02T13:56:36.813Z",
+  "title": "Design System: 個人助理",
+  "extensions": {
+    "colorMeta": {
+      "mist-sunday": {
+        "role": "primary",
+        "displayName": "週日・霧灰藍 Slate Mist",
+        "canonical": "#596279",
+        "oklch": "oklch(49.7% 0.039 268.2)",
+        "dataDay": 0,
+        "derived": {
+          "card": "#6d7589",
+          "ink": "#3e4555",
+          "bar": "#474e61"
+        },
+        "tonalRamp": [
+          "#090b0f",
+          "#1f2430",
+          "#373f55",
+          "#545d74",
+          "#768098",
+          "#9aa4be",
+          "#c4cadb",
+          "#eceef5"
+        ]
+      },
+      "dot-sunday": {
+        "role": "secondary",
+        "displayName": "週日點綴・杏桃",
+        "canonical": "#ffd0a0",
+        "oklch": "oklch(88.7% 0.082 67.0)",
+        "dataDay": 0,
+        "tonalRamp": [
+          "#110903",
+          "#351e04",
+          "#5c3600",
+          "#7c5426",
+          "#a17749",
+          "#c79b6c",
+          "#e2c5a7",
+          "#f8ece0"
+        ]
+      },
+      "mist-monday": {
+        "role": "primary",
+        "displayName": "週一・霧藍 Harbor Mist",
+        "canonical": "#526478",
+        "oklch": "oklch(49.6% 0.039 251.3)",
+        "dataDay": 1,
+        "derived": {
+          "card": "#677788",
+          "ink": "#394654",
+          "bar": "#425060"
+        },
+        "tonalRamp": [
+          "#080b0f",
+          "#1b2530",
+          "#304154",
+          "#4e5f73",
+          "#6f8297",
+          "#93a7bd",
+          "#bfccdb",
+          "#eaeff5"
+        ]
+      },
+      "dot-monday": {
+        "role": "secondary",
+        "displayName": "週一點綴・淺杏",
+        "canonical": "#ffd3a3",
+        "oklch": "oklch(89.3% 0.079 69.0)",
+        "dataDay": 1,
+        "tonalRamp": [
+          "#110a04",
+          "#341f04",
+          "#5a3702",
+          "#7b5527",
+          "#9f774a",
+          "#c69c6d",
+          "#e1c5a8",
+          "#f8ece1"
+        ]
+      },
+      "mist-tuesday": {
+        "role": "primary",
+        "displayName": "週二・灰綠 Sage Moss",
+        "canonical": "#566655",
+        "oklch": "oklch(49.2% 0.033 143.5)",
+        "dataDay": 2,
+        "derived": {
+          "card": "#6a7869",
+          "ink": "#3c473b",
+          "bar": "#455244"
+        },
+        "tonalRamp": [
+          "#090c09",
+          "#1e271d",
+          "#354435",
+          "#536352",
+          "#758674",
+          "#99aa98",
+          "#c3cec2",
+          "#ebf0eb"
+        ]
+      },
+      "dot-tuesday": {
+        "role": "secondary",
+        "displayName": "週二點綴・稻黃",
+        "canonical": "#ffe29a",
+        "oklch": "oklch(92.1% 0.096 88.5)",
+        "dataDay": 2,
+        "tonalRamp": [
+          "#0f0b02",
+          "#2e2201",
+          "#503d02",
+          "#745a06",
+          "#987d36",
+          "#bda15b",
+          "#dbc99d",
+          "#f5eedd"
+        ]
+      },
+      "mist-wednesday": {
+        "role": "primary",
+        "displayName": "週三・灰紫 Wisteria Dusk",
+        "canonical": "#685e77",
+        "oklch": "oklch(50.1% 0.041 303.2)",
+        "dataDay": 3,
+        "derived": {
+          "card": "#7a7187",
+          "ink": "#494253",
+          "bar": "#534b5f"
+        },
+        "tonalRamp": [
+          "#0c0a0f",
+          "#27212f",
+          "#443b52",
+          "#625871",
+          "#857b95",
+          "#aa9fba",
+          "#cec7d9",
+          "#f0edf4"
+        ]
+      },
+      "dot-wednesday": {
+        "role": "secondary",
+        "displayName": "週三點綴・鮭粉",
+        "canonical": "#ffc9a8",
+        "oklch": "oklch(87.6% 0.076 52.9)",
+        "dataDay": 3,
+        "tonalRamp": [
+          "#120905",
+          "#361d0c",
+          "#5e3315",
+          "#7f5133",
+          "#a47455",
+          "#cb9878",
+          "#e5c3ae",
+          "#f9ebe3"
+        ]
+      },
+      "mist-thursday": {
+        "role": "primary",
+        "displayName": "週四・灰玫瑰 Dried Rose",
+        "canonical": "#765b60",
+        "oklch": "oklch(50.0% 0.036 6.1)",
+        "dataDay": 4,
+        "derived": {
+          "card": "#866f73",
+          "ink": "#534043",
+          "bar": "#5e494d"
+        },
+        "tonalRamp": [
+          "#0f0a0b",
+          "#2e1f22",
+          "#51383d",
+          "#70555a",
+          "#94787d",
+          "#ba9ca1",
+          "#d9c5c8",
+          "#f4eced"
+        ]
+      },
+      "dot-thursday": {
+        "role": "secondary",
+        "displayName": "週四點綴・奶油黃",
+        "canonical": "#ffe0a3",
+        "oklch": "oklch(91.8% 0.085 83.9)",
+        "dataDay": 4,
+        "tonalRamp": [
+          "#0f0a03",
+          "#2f2203",
+          "#523c07",
+          "#74591c",
+          "#987c41",
+          "#bea065",
+          "#dbc8a3",
+          "#f5eedf"
+        ]
+      },
+      "mist-friday": {
+        "role": "primary",
+        "displayName": "週五・灰青 Celadon Slate",
+        "canonical": "#4c666b",
+        "oklch": "oklch(49.1% 0.032 210.7)",
+        "dataDay": 5,
+        "derived": {
+          "card": "#61787d",
+          "ink": "#35474b",
+          "bar": "#3d5256"
+        },
+        "tonalRamp": [
+          "#080c0d",
+          "#18272a",
+          "#2b4449",
+          "#496368",
+          "#6b868b",
+          "#8faab0",
+          "#bcced2",
+          "#e9f0f1"
+        ]
+      },
+      "dot-friday": {
+        "role": "secondary",
+        "displayName": "週五點綴・麥黃",
+        "canonical": "#ffdda1",
+        "oklch": "oklch(91.2% 0.085 81.4)",
+        "dataDay": 5,
+        "tonalRamp": [
+          "#100a03",
+          "#302103",
+          "#533b07",
+          "#76581c",
+          "#9a7b41",
+          "#c09f65",
+          "#ddc8a3",
+          "#f6eddf"
+        ]
+      },
+      "mist-saturday": {
+        "role": "primary",
+        "displayName": "週六・鉛灰 Pewter",
+        "canonical": "#616265",
+        "oklch": "oklch(49.6% 0.005 271.3)",
+        "dataDay": 6,
+        "derived": {
+          "card": "#747577",
+          "ink": "#444547",
+          "bar": "#4e4e51"
+        },
+        "tonalRamp": [
+          "#0b0b0c",
+          "#232426",
+          "#3f4042",
+          "#5c5d60",
+          "#7f8083",
+          "#a3a4a8",
+          "#cacacc",
+          "#eeeeef"
+        ]
+      },
+      "dot-saturday": {
+        "role": "secondary",
+        "displayName": "週六點綴・晴空藍",
+        "canonical": "#bfe0ff",
+        "oklch": "oklch(89.3% 0.055 246.8)",
+        "dataDay": 6,
+        "tonalRamp": [
+          "#070c11",
+          "#152634",
+          "#26425b",
+          "#44617b",
+          "#6584a0",
+          "#89a9c6",
+          "#b9cde1",
+          "#e7f0f7"
+        ]
+      },
+      "paper-white": {
+        "role": "neutral",
+        "displayName": "紙白",
+        "canonical": "#ffffff",
+        "tonalRamp": [
+          "#0b0b0b",
+          "#242424",
+          "#404040",
+          "#5d5d5d",
+          "#808080",
+          "#a4a4a4",
+          "#cacaca",
+          "#eeeeee"
+        ]
+      },
+      "card": {
+        "role": "neutral",
+        "displayName": "卡片色（當天封面 88% 混白）",
+        "canonical": "color-mix(in srgb, var(--bg) 88%, white)",
+        "perDay": {
+          "sunday": "#6d7589",
+          "monday": "#677788",
+          "tuesday": "#6a7869",
+          "wednesday": "#7a7187",
+          "thursday": "#866f73",
+          "friday": "#61787d",
+          "saturday": "#747577"
+        },
+        "tonalRamp": [
+          "#090c09",
+          "#1f261e",
+          "#374436",
+          "#546254",
+          "#778576",
+          "#9ba999",
+          "#c4cec3",
+          "#ecf0eb"
+        ]
+      },
+      "ink": {
+        "role": "neutral",
+        "displayName": "墨色（當天封面 70% 混黑）",
+        "canonical": "color-mix(in srgb, var(--bg) 70%, black)",
+        "perDay": {
+          "sunday": "#3e4555",
+          "monday": "#394654",
+          "tuesday": "#3c473b",
+          "wednesday": "#494253",
+          "thursday": "#534043",
+          "friday": "#35474b",
+          "saturday": "#444547"
+        },
+        "tonalRamp": [
+          "#0a0c09",
+          "#20261f",
+          "#384337",
+          "#566155",
+          "#788477",
+          "#9ca99b",
+          "#c5cdc4",
+          "#ecf0ec"
+        ]
+      },
+      "bar": {
+        "role": "neutral",
+        "displayName": "工具列色（當天封面 80% 混黑）",
+        "canonical": "color-mix(in srgb, var(--bg) 80%, black)",
+        "perDay": {
+          "sunday": "#474e61",
+          "monday": "#425060",
+          "tuesday": "#455244",
+          "wednesday": "#534b5f",
+          "thursday": "#5e494d",
+          "friday": "#3d5256",
+          "saturday": "#4e4e51"
+        },
+        "tonalRamp": [
+          "#090c09",
+          "#1f261e",
+          "#374436",
+          "#556254",
+          "#778576",
+          "#9ba999",
+          "#c4cec3",
+          "#ecf0eb"
+        ]
+      },
+      "line": {
+        "role": "neutral",
+        "displayName": "細線（42% 白）",
+        "canonical": "rgb(255 255 255 / 0.42)",
+        "tonalRamp": [
+          "#0b0b0b",
+          "#242424",
+          "#404040",
+          "#5d5d5d",
+          "#808080",
+          "#a4a4a4",
+          "#cacaca",
+          "#eeeeee"
+        ]
+      }
+    },
+    "typographyMeta": {
+      "display": {
+        "displayName": "Display（刊頭）",
+        "purpose": "刊頭的英文星期或頁名。",
+        "fontStyle": "italic"
+      },
+      "dateline": {
+        "displayName": "Dateline",
+        "purpose": "刊頭下方的大寫字距日期或副標。",
+        "textTransform": "uppercase"
+      },
+      "section": {
+        "displayName": "Section",
+        "purpose": "斜體英文分段標題，下接 1px 細線。",
+        "fontStyle": "italic"
+      },
+      "title": {
+        "displayName": "Title",
+        "purpose": "思考內容的標題。"
+      },
+      "question": {
+        "displayName": "Question",
+        "purpose": "思考題，左側 1px 白線引出。"
+      },
+      "body-reading": {
+        "displayName": "Body reading",
+        "purpose": "可讀段落：思考內文、問候、摘要、空狀態。"
+      },
+      "body": {
+        "displayName": "Body",
+        "purpose": "列表項目與表單；輸入框固定 16px。"
+      },
+      "meta": {
+        "displayName": "Meta",
+        "purpose": "次要資訊與切換；英文斜體、中文正體。",
+        "fontStyle": "italic"
+      },
+      "label-nav": {
+        "displayName": "Label nav",
+        "purpose": "底部工具列標籤。",
+        "textTransform": "uppercase"
+      },
+      "label-tag": {
+        "displayName": "Label tag",
+        "purpose": "急件小標籤。"
+      },
+      "numerals": {
+        "displayName": "Numerals",
+        "purpose": "時間、日期、筆數。",
+        "fontVariantNumeric": "lining-nums tabular-nums"
+      }
+    },
+    "fonts": {
+      "latin": {
+        "family": "EB Garamond",
+        "source": "next/font/google（--font-garamond）",
+        "weights": [
+          400,
+          500,
+          600
+        ],
+        "styles": [
+          "normal",
+          "italic"
+        ]
+      },
+      "tc": {
+        "family": "Noto Serif TC",
+        "source": "Google Fonts CSS（wght 400;500;600, display=swap）",
+        "styles": [
+          "normal"
+        ]
+      },
+      "fontSynthesisStyle": "none",
+      "bodyStack": "var(--font-garamond), \"Noto Serif TC\", serif"
+    },
+    "shadows": [
+      {
+        "name": "bar-float",
+        "value": "0 10px 30px -8px rgb(0 0 0 / 0.45)",
+        "purpose": "只用在底部浮起工具列；內容層一律無陰影。"
+      }
+    ],
+    "focus": [
+      {
+        "name": "focus-ring",
+        "value": "outline: 2px solid var(--fg); outline-offset: 3px; border-radius: 4px",
+        "purpose": "全站 :focus-visible。"
+      }
+    ],
+    "motion": [
+      {
+        "name": "capture-open",
+        "value": "460ms cubic-bezier(0.16, 1, 0.3, 1); clip-path inset(0 0 0 calc(100% - 54px) round 31px) → inset(0 0 0 0 round 31px); opacity 0.6 → 1",
+        "purpose": "唯一的招牌動畫：＋展開成輸入框。"
+      },
+      {
+        "name": "press",
+        "value": "transform scale(0.97) 120ms ease-out（＋ 為 scale(0.95)）",
+        "purpose": "按壓回饋。"
+      },
+      {
+        "name": "cover-crossfade",
+        "value": "background-color 600ms cubic-bezier(0.16, 1, 0.3, 1)",
+        "purpose": "html 背景換色。"
+      },
+      {
+        "name": "disclosure",
+        "value": "rotate(180deg)，Tailwind transition-transform 預設時間",
+        "purpose": "收合區塊的箭頭。"
+      },
+      {
+        "name": "reduced-motion",
+        "value": "@media (prefers-reduced-motion: reduce) { transition-duration: 0ms; animation-duration: 0ms }",
+        "purpose": "所有動態歸零。"
+      }
+    ],
+    "dayTheme": {
+      "attribute": "data-day",
+      "values": "0 = 週日 … 6 = 週六",
+      "timezone": "Asia/Taipei",
+      "setBy": "src/app/layout.tsx 的 inline script（同步更新 meta theme-color）",
+      "tokens": [
+        "--bg",
+        "--dot"
+      ],
+      "derivedTokens": {
+        "--card": "color-mix(in srgb, var(--bg) 88%, white)",
+        "--card-strong": "color-mix(in srgb, var(--bg) 78%, white)（已定義但未使用；白字約 3.7:1，不可放內文）",
+        "--line": "rgb(255 255 255 / 0.42)",
+        "--ink": "color-mix(in srgb, var(--bg) 70%, black)",
+        "--bar": "color-mix(in srgb, var(--bg) 80%, black)"
+      },
+      "contrast": {
+        "whiteOnBg": "6.08–6.14:1",
+        "whiteOnCard": "4.61–4.65:1",
+        "whiteOnBar": "8.24–8.32:1",
+        "inkOnWhite": "9.62–9.70:1",
+        "dotOnCard": "3.11–3.67:1（非文字圖形）",
+        "whiteOnCardStrong": "3.71–3.74:1"
+      }
+    },
+    "layout": {
+      "column": "max-width 576px（max-w-xl），左右 20px",
+      "safeArea": "top max(20px, env(safe-area-inset-top))；工具列 bottom max(18px, env(safe-area-inset-bottom))",
+      "barClearance": "padding-bottom 144px",
+      "login": "max-width 384px，左右 24px，垂直置中"
+    },
+    "breakpoints": []
+  },
+  "components": [
+    {
+      "name": "Primary Button",
+      "kind": "button",
+      "refersTo": "button-primary",
+      "description": "白底墨字的主要動作（儲存、確認、登入），一個畫面通常只有一個。",
+      "html": "<div class=\"ds-surface\"><button class=\"ds-btn\">儲存感想</button> <button class=\"ds-btn\" disabled>處理中…</button></div>",
+      "css": ".ds-surface{background: var(--bg, #566655); color: #fff; padding: 20px; font-family: 'EB Garamond', 'Noto Serif TC', serif; font-synthesis-style: none;} .ds-btn{min-height:44px;padding:0 18px;border:0;border-radius:6px;background:#fff;color:var(--ink, color-mix(in srgb, var(--bg, #566655) 70%, black));font:inherit;font-size:16px;font-weight:600;display:inline-flex;align-items:center;justify-content:center;gap:6px;transition:transform 120ms ease-out,opacity 120ms ease-out;cursor:pointer} .ds-btn:active{transform:scale(0.97)} .ds-btn:disabled{opacity:0.45} .ds-btn:focus-visible{outline:2px solid #fff;outline-offset:3px;border-radius:4px}"
+    },
+    {
+      "name": "Quiet Button",
+      "kind": "button",
+      "refersTo": "button-quiet",
+      "description": "細線框的次要動作與篩選；按下狀態翻成白底墨字。",
+      "html": "<div class=\"ds-surface\"><button class=\"ds-btn-quiet\">今天做</button> <button class=\"ds-btn-quiet\" aria-pressed=\"true\">行政</button> <button class=\"ds-btn-quiet\">不做了</button></div>",
+      "css": ".ds-surface{background: var(--bg, #566655); color: #fff; padding: 20px; font-family: 'EB Garamond', 'Noto Serif TC', serif; font-synthesis-style: none;} .ds-btn-quiet{min-height:44px;padding:0 14px;border-radius:6px;border:1px solid var(--line, rgb(255 255 255 / 0.42));background:transparent;color:#fff;font:inherit;font-size:14px;display:inline-flex;align-items:center;justify-content:center;gap:6px;cursor:pointer} .ds-btn-quiet[aria-pressed=\"true\"]{background:#fff;color:var(--ink, color-mix(in srgb, var(--bg, #566655) 70%, black));border-color:#fff} .ds-btn-quiet:focus-visible{outline:2px solid #fff;outline-offset:3px;border-radius:4px}"
+    },
+    {
+      "name": "Field",
+      "kind": "input",
+      "refersTo": "field",
+      "description": "卡片色底、細線框的輸入框；聚焦時邊框變全白，固定 16px 字。",
+      "html": "<div class=\"ds-surface\"><input class=\"ds-field\" placeholder=\"一句話就好，助理會參考你的感想調整內容\"></div>",
+      "css": ".ds-surface{background: var(--bg, #566655); color: #fff; padding: 20px; font-family: 'EB Garamond', 'Noto Serif TC', serif; font-synthesis-style: none;} .ds-field{width:100%;box-sizing:border-box;min-height:44px;padding:10px 12px;background:var(--card, color-mix(in srgb, var(--bg, #566655) 88%, white));border:1px solid var(--line, rgb(255 255 255 / 0.42));border-radius:6px;color:#fff;font:inherit;font-size:16px;outline:none;caret-color:#fff} .ds-field::placeholder{color:rgb(255 255 255 / 0.9);font-style:italic} .ds-field:focus{border-color:#fff}"
+    },
+    {
+      "name": "Section Head + Card",
+      "kind": "card",
+      "refersTo": "card",
+      "description": "斜體英文分段標題加細底線，下面是無陰影的 6px 平面卡片。",
+      "html": "<div class=\"ds-surface\"><h2 class=\"ds-sec\">Notes to self</h2><ul class=\"ds-card\"><li>問王老師下學期的時段</li><li>琴房冷氣找人來看</li></ul></div>",
+      "css": ".ds-surface{background: var(--bg, #566655); color: #fff; padding: 20px; font-family: 'EB Garamond', 'Noto Serif TC', serif; font-synthesis-style: none;} .ds-sec{font-family:'EB Garamond',serif;font-style:italic;font-weight:400;font-size:16px;border-bottom:1px solid var(--line, rgb(255 255 255 / 0.42));padding-bottom:6px;margin:0 0 10px} .ds-card{background:var(--card, color-mix(in srgb, var(--bg, #566655) 88%, white));border-radius:6px;padding:14px 16px;margin:0;list-style:none;line-height:1.8}"
+    },
+    {
+      "name": "Thought Card",
+      "kind": "custom",
+      "refersTo": "card-thought",
+      "description": "早上第一張卡：19px 標題、15px 寬行距內文、左線引出的 17px 思考題、meta 說明。",
+      "html": "<div class=\"ds-surface\"><article class=\"ds-thought\"><h3>招生的瓶頸在哪一步？</h3><p class=\"ds-body\">把上個月的詢問一路追到報名，看看人在哪裡停下來。</p><p class=\"ds-q\">如果只能改一個環節，你會改哪一個？</p><p class=\"ds-meta\">本週有三組試聽，正好可以觀察。</p></article></div>",
+      "css": ".ds-surface{background: var(--bg, #566655); color: #fff; padding: 20px; font-family: 'EB Garamond', 'Noto Serif TC', serif; font-synthesis-style: none;} .ds-thought{background:var(--card, color-mix(in srgb, var(--bg, #566655) 88%, white));border-radius:6px;padding:18px} .ds-thought h3{margin:0;font-size:19px;line-height:1.6;font-weight:600} .ds-body{margin:12px 0 0;font-size:15px;line-height:1.9} .ds-q{margin:16px 0 0;border-left:1px solid #fff;padding-left:12px;font-size:17px;line-height:1.75;font-weight:500} .ds-meta{margin:16px 0 0;font-style:italic;font-size:13.5px;letter-spacing:0.02em}"
+    },
+    {
+      "name": "Todo Row",
+      "kind": "custom",
+      "refersTo": "urgency-tag",
+      "description": "7px 圓點就是完成鈕（點擊範圍 44px）；完成後變空心並劃線；只標「急」。",
+      "html": "<div class=\"ds-surface\"><div class=\"ds-card\"><div class=\"ds-row\"><button class=\"ds-dot-btn\" aria-label=\"完成\"><span class=\"ds-dot\"></span></button><span class=\"ds-title\">回覆家長的請假訊息</span><span class=\"ds-tag\">急</span><span class=\"ds-num\">10:30</span></div><div class=\"ds-row ds-done\"><button class=\"ds-dot-btn\" aria-pressed=\"true\" aria-label=\"標回未完成\"><span class=\"ds-dot\"></span></button><span class=\"ds-title\">確認本週排課</span></div></div></div>",
+      "css": ".ds-surface{background: var(--bg, #566655); color: #fff; padding: 20px; font-family: 'EB Garamond', 'Noto Serif TC', serif; font-synthesis-style: none;} .ds-card{background:var(--card, color-mix(in srgb, var(--bg, #566655) 88%, white));border-radius:6px;padding:4px 16px} .ds-row{display:flex;align-items:center;min-height:44px} .ds-row+.ds-row{border-top:1px solid var(--line, rgb(255 255 255 / 0.42))} .ds-dot-btn{margin-left:-10px;width:44px;height:44px;flex:none;display:flex;align-items:center;justify-content:center;background:none;border:0;cursor:pointer} .ds-dot{width:7px;height:7px;border-radius:9999px;background:#fff;box-sizing:border-box;transition:background-color 150ms} .ds-done .ds-dot{background:transparent;border:1px solid #fff} .ds-done .ds-title{text-decoration:line-through;text-decoration-thickness:1px} .ds-title{flex:1;line-height:1.375;padding:11px 12px 11px 0} .ds-tag{background:#fff;color:var(--ink, color-mix(in srgb, var(--bg, #566655) 70%, black));border-radius:4px;padding:0 6px;font-size:12px;line-height:20px;margin-right:12px} .ds-num{font-family:'EB Garamond',serif;font-variant-numeric:lining-nums tabular-nums;font-size:15px} .ds-dot-btn:focus-visible{outline:2px solid #fff;outline-offset:-6px;border-radius:4px}"
+    },
+    {
+      "name": "Schedule Row",
+      "kind": "custom",
+      "refersTo": "card",
+      "description": "自己的行程用當天點綴色的實心點，教室其他課用白框空心點；時間是 Garamond 等寬數字。",
+      "html": "<div class=\"ds-surface\"><div class=\"ds-card\"><div class=\"ds-ev\"><span class=\"ds-mine\"></span><div><div>與會計師對帳</div><div class=\"ds-meta\"><span class=\"ds-num\">14:00 – 15:00</span>　教室行事曆</div></div></div><div class=\"ds-ev\"><span class=\"ds-other\"></span><div><div>鋼琴個別課</div><div class=\"ds-meta\"><span class=\"ds-num\">16:00 – 17:00</span>　大安教室</div></div></div></div></div>",
+      "css": ".ds-surface{background: var(--bg, #566655); color: #fff; padding: 20px; font-family: 'EB Garamond', 'Noto Serif TC', serif; font-synthesis-style: none;} .ds-card{background:var(--card, color-mix(in srgb, var(--bg, #566655) 88%, white));border-radius:6px;padding:4px 16px} .ds-ev{display:flex;align-items:center;gap:12px;padding:10px 0;line-height:1.375} .ds-ev+.ds-ev{border-top:1px solid var(--line, rgb(255 255 255 / 0.42))} .ds-mine,.ds-other{width:7px;height:7px;border-radius:9999px;flex:none;box-sizing:border-box} .ds-mine{background:var(--dot, #ffe29a)} .ds-other{border:1px solid #fff} .ds-meta{font-style:italic;font-size:13.5px;letter-spacing:0.02em} .ds-num{font-style:normal;font-family:'EB Garamond',serif;font-variant-numeric:lining-nums tabular-nums}"
+    },
+    {
+      "name": "Masthead",
+      "kind": "custom",
+      "refersTo": "",
+      "description": "刊頭：50px Garamond 斜體英文星期，下方 13px 大寫字距日期，右側 meta 字體的早晚切換。",
+      "html": "<div class=\"ds-surface\"><header class=\"ds-mast\"><div><h1 class=\"ds-day\">Tuesday</h1><p class=\"ds-date\">November 3</p></div><div class=\"ds-switch\"><button class=\"ds-on\">Morning</button><button>Evening</button></div></header></div>",
+      "css": ".ds-surface{background: var(--bg, #566655); color: #fff; padding: 20px; font-family: 'EB Garamond', 'Noto Serif TC', serif; font-synthesis-style: none;} .ds-mast{display:flex;align-items:flex-end;justify-content:space-between;gap:16px} .ds-day{margin:0;font-family:'EB Garamond',serif;font-style:italic;font-weight:400;font-size:50px;line-height:1;letter-spacing:-0.01em} .ds-date{margin:8px 0 0;font-family:'EB Garamond',serif;font-weight:500;font-size:13px;letter-spacing:0.3em;text-transform:uppercase} .ds-switch{display:flex;gap:4px;padding-bottom:4px} .ds-switch button{min-height:44px;padding:0 8px;background:none;border:0;color:#fff;font-family:'EB Garamond',serif;font-style:italic;font-size:13.5px;letter-spacing:0.02em;cursor:pointer} .ds-switch .ds-on{text-decoration:underline;text-decoration-thickness:1px;text-underline-offset:6px} .ds-switch button:focus-visible{outline:2px solid #fff;outline-offset:3px;border-radius:4px}"
+    },
+    {
+      "name": "Bottom Bar",
+      "kind": "nav",
+      "refersTo": "bottom-bar",
+      "description": "浮起的膠囊工具列：三個大寫字距 Garamond 標籤，加右側白色圓形＋。",
+      "html": "<div class=\"ds-surface\"><nav class=\"ds-bar\"><button class=\"ds-tab ds-cur\">Today</button><button class=\"ds-tab\">Tasks</button><button class=\"ds-tab\">Settings</button><button class=\"ds-plus\" aria-label=\"記一件事\"><svg width=\"24\" height=\"24\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\" aria-hidden=\"true\"><path d=\"M12 5l0 14\"/><path d=\"M5 12l14 0\"/></svg></button></nav></div>",
+      "css": ".ds-surface{background: var(--bg, #566655); color: #fff; padding: 20px; font-family: 'EB Garamond', 'Noto Serif TC', serif; font-synthesis-style: none;} .ds-bar{display:flex;align-items:center;height:62px;max-width:536px;padding:0 8px 0 12px;border-radius:31px;background:var(--bar, color-mix(in srgb, var(--bg, #566655) 80%, black));box-shadow:0 10px 30px -8px rgb(0 0 0 / 0.45)} .ds-tab{flex:1;height:46px;background:none;border:0;color:#fff;font-family:'EB Garamond',serif;font-size:12px;letter-spacing:0.16em;text-transform:uppercase;cursor:pointer} .ds-cur{text-decoration:underline;text-decoration-thickness:1px;text-underline-offset:6px} .ds-plus{width:46px;height:46px;flex:none;border:0;border-radius:9999px;background:#fff;color:var(--ink, color-mix(in srgb, var(--bg, #566655) 70%, black));display:flex;align-items:center;justify-content:center;cursor:pointer;transition:transform 150ms} .ds-plus:active{transform:scale(0.95)} .ds-tab:focus-visible,.ds-plus:focus-visible{outline:2px solid #fff;outline-offset:3px;border-radius:4px}"
+    },
+    {
+      "name": "Capture Bar (expanded)",
+      "kind": "input",
+      "refersTo": "capture-button",
+      "description": "按＋後工具列原地展開成輸入框：clip-path 從右側 54px 圓形展開到整條膠囊，460ms。",
+      "html": "<div class=\"ds-surface\"><form class=\"ds-bar ds-open\" onsubmit=\"return false\"><input class=\"ds-in\" placeholder=\"想到什麼就記下來…\" aria-label=\"記一件事\"><button class=\"ds-send\" aria-label=\"記下\"><svg width=\"22\" height=\"22\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\" aria-hidden=\"true\"><path d=\"M12 5l0 14\"/><path d=\"M18 11l-6 -6\"/><path d=\"M6 11l6 -6\"/></svg></button></form></div>",
+      "css": ".ds-surface{background: var(--bg, #566655); color: #fff; padding: 20px; font-family: 'EB Garamond', 'Noto Serif TC', serif; font-synthesis-style: none;} .ds-bar{display:flex;align-items:center;gap:8px;height:62px;max-width:536px;padding:0 8px 0 20px;border-radius:31px;background:var(--bar, color-mix(in srgb, var(--bg, #566655) 80%, black));box-shadow:0 10px 30px -8px rgb(0 0 0 / 0.45);box-sizing:border-box} .ds-open{animation:ds-capture-open 460ms cubic-bezier(0.16,1,0.3,1)} @keyframes ds-capture-open{from{clip-path:inset(0 0 0 calc(100% - 54px) round 31px);opacity:.6}to{clip-path:inset(0 0 0 0 round 31px);opacity:1}} .ds-in{flex:1;min-width:0;background:transparent;border:0;outline:none;color:#fff;font:inherit;font-size:16px;padding:12px 0;caret-color:#fff} .ds-in::placeholder{color:rgb(255 255 255 / 0.9);font-style:italic} .ds-send{width:46px;height:46px;flex:none;border:0;border-radius:9999px;background:#fff;color:var(--ink, color-mix(in srgb, var(--bg, #566655) 70%, black));display:flex;align-items:center;justify-content:center;cursor:pointer} .ds-send:focus-visible{outline:2px solid #fff;outline-offset:3px;border-radius:4px} @media (prefers-reduced-motion: reduce){.ds-open{animation-duration:0ms}}"
+    }
+  ],
+  "narrative": {
+    "northStar": "每日霧色封面的生活雜誌（The Daily Mist Cover）",
+    "overview": "整個 App 是一本每天換封面色的日系生活雜誌。打開時整個畫面是一片當天的霧色，左上角是斜體大字的英文星期當刊頭，下面一行大寫字距的日期；往下翻，先讀到「Thought of the day」，才是行程與最該先做的三件事。顏色本身就是日期：一週七種霧色，看一眼就知道今天星期幾。\n\n材質是平的紙：同色系提亮一階的卡片、6px 小圓角、不加陰影；層次靠卡片色階與一條半透明白細線，不靠投影。文字一律白色，英文與數字用 EB Garamond（刊頭、分段標題用真正的斜體），中文用思源宋體（明體），中文永遠保持正體。次要資訊靠縮小一號與斜體分層，不靠變淡。版面是單欄、手機優先，密度鬆，行高寬，像在讀雜誌而不是掃清單。\n\n唯一會「表演」的地方是底部浮起的工具列：按右下角的白色＋，整條工具列從＋的位置展開成輸入框。其他動作只有短促的按壓回饋。明確拒絕的預設：白底清單加圓形勾選框的待辦 App 外觀。",
+    "keyCharacteristics": [
+      "每天一種霧色封面（`[data-day]`，0 = 週日），所有表面色都從當天的 `--bg` 推導。",
+      "白字在卡片上至少 4.5:1；工具列上約 8:1。",
+      "EB Garamond 斜體刊頭與分段標題，思源宋體正體中文，`font-synthesis-style: none`。",
+      "平面卡片：6px 圓角、沒有陰影；唯一的陰影屬於浮起的底部工具列。",
+      "項目前面是 7px 小圓點，圓點本身就是完成鈕；自己的行程用當天的暖色點。",
+      "一個招牌動畫（＋展開成輸入框），尊重減少動態效果設定。",
+      "所有觸控目標至少 44px。"
+    ],
+    "rules": [
+      {
+        "name": "The Seven Covers Rule",
+        "body": "表面色只有一個來源：當天的 `--bg`。卡片、墨、工具列都用 `color-mix()` 從它推導；新元件不得寫死任何表面色碼，否則換一天就會脫隊。",
+        "section": "colors"
+      },
+      {
+        "name": "The 4.5 Floor Rule",
+        "body": "新增或調整封面色時，先確認白字在「88% 混白」的卡片色上至少 4.5:1，不夠就把封面調暗，而不是把字變粗或加底。`globals.css` 裡的 `--card-strong`（78% 混白）白字只有約 3.7:1，不可放內文。",
+        "section": "colors"
+      },
+      {
+        "name": "The One Warm Dot Rule",
+        "body": "點綴色只是一顆圓點，標出「這是我的行程」；不做文字色、不做底色、不做按鈕。",
+        "section": "colors"
+      },
+      {
+        "name": "The True Italic Rule",
+        "body": "斜體只來自 Garamond 自帶的斜體字形。`body` 設 `font-synthesis-style: none`，思源宋體沒有斜體，中文絕不被瀏覽器壓斜；需要「斜」的語氣時，中文靠字級與位置表達。",
+        "section": "typography"
+      },
+      {
+        "name": "The Size Not Fade Rule",
+        "body": "次要文字用 13.5px 斜體 meta 與內文區分，不用降低透明度；白字永遠是全白，對比才守得住。",
+        "section": "typography"
+      },
+      {
+        "name": "The English Voice Rule",
+        "body": "刊頭、分段標題、工具列標籤用英文 Garamond，像雜誌的欄目名；內容、按鈕、說明一律用繁體中文。",
+        "section": "typography"
+      },
+      {
+        "name": "The Thumb Rule",
+        "body": "每個可點的東西至少 44×44px：完成圓點的點擊範圍、切換、文字連結、安靜按鈕、輸入框都一樣；主要動作（＋）固定在右下角拇指可及處。",
+        "section": "layout"
+      },
+      {
+        "name": "The Flat Paper Rule",
+        "body": "內容層一律平面：卡片不加陰影、不加漸層、不加模糊。需要分層時用卡片色或細線。",
+        "section": "elevation"
+      },
+      {
+        "name": "The Dot Rule",
+        "body": "項目標記是 7px 小圓點，不是勾選框。待辦：未完成是白色實心點，完成後變成白框空心點並劃線。行程：自己的行程是當天點綴色的實心點，教室其他課是白框空心點。",
+        "section": "shapes"
+      },
+      {
+        "name": "The One Flourish Rule",
+        "body": "整個 App 只有一個招牌動畫：＋展開成輸入框。其他動態只限於按壓縮放（0.95–0.97）、收合箭頭旋轉、以及換日時封面色 600ms 的背景淡換；新功能不加入場、捲動或裝飾性動畫。",
+        "section": "components"
+      }
+    ],
+    "dos": [
+      "Do 從當天的 `--bg` 推導所有表面色（卡片 88% 混白、墨 70% 混黑、工具列 80% 混黑），新元件用 `bg-card`、`text-ink`、`bg-bar`、`border-line` 這些語意色。",
+      "Do 新增封面色時先驗證白字在卡片色上 ≥ 4.5:1，不夠就調暗封面色，並同步更新 `globals.css` 的 `[data-day]` 與 `layout.tsx` 的 `DAY_COLORS`。",
+      "Do 用 13.5px 斜體 meta 表達次要資訊，文字顏色保持全白。",
+      "Do 刊頭與分段標題用 EB Garamond 斜體英文；中文內容用思源宋體正體。",
+      "Do 讓每個可點元素至少 44×44px，輸入框字級保持 16px。",
+      "Do 元素層級的預設樣式寫在 `@layer base`，元件類別寫在 `@layer components`，讓 Tailwind 工具類能覆蓋。",
+      "Do 數字（時間、日期、筆數）用 Garamond 等高等寬數字。"
+    ],
+    "donts": [
+      "Don't 給卡片、輸入框或列表加陰影；陰影只屬於浮起的底部工具列。",
+      "Don't 用透明度把次要文字變淡；透明度只留給停用狀態、placeholder 與細線。",
+      "Don't 讓中文變成斜體，或拿掉 `font-synthesis-style: none`。",
+      "Don't 用方形或圓形勾選框取代 7px 圓點；不要做成白底清單的待辦 App。",
+      "Don't 用紅色或警示色標示急件或拖延；急件只用白底墨字的小標籤。",
+      "Don't 把點綴色用在文字、底色或按鈕上。",
+      "Don't 在 `--card-strong` 上放白色內文（約 3.7:1，低於 4.5:1）。",
+      "Don't 加第二個招牌動畫或裝飾性動態；所有動態都要在減少動態效果設定下歸零。"
+    ]
+  }
+}

@@ -9,3 +9,10 @@ next-env.d.ts
 # Impeccable：執行檔缺少時會自動下載；hook 設定是個人設定，換電腦重跑 npx impeccable install
 .claude/skills/impeccable/scripts/bin/
 .claude/settings.local.json
+
+# Impeccable 工作檔：參考截圖含第三方網站與 App Store 畫面，不放進公開 repo
+.impeccable/refs/
+.impeccable/mocks/
+.impeccable/review/
+.impeccable/questions/
+.impeccable/decision/
