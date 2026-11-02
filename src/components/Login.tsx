@@ -18,7 +18,12 @@ export default function Login() {
       const { error } = await supabase.auth.signInWithPassword({ email, password });
       if (error) setMessage({ text: "登入失敗：Email 或密碼不對", error: true });
     } else {
-      const { data, error } = await supabase.auth.signUp({ email, password });
+      // 確認信的連結點完要回到這個 App；不指定的話 Supabase 會導回後台的 Site URL（預設 localhost）
+      const { data, error } = await supabase.auth.signUp({
+        email,
+        password,
+        options: { emailRedirectTo: window.location.origin + window.location.pathname },
+      });
       if (error) setMessage({ text: `註冊失敗：${error.message}`, error: true });
       else if (!data.session) setMessage({ text: "註冊成功！請到信箱點確認信，再回來登入。", error: false });
     }
