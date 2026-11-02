@@ -18,7 +18,9 @@
 1. `list_calendars`，再對每個行事曆 `list_events`（startTime = TOMORROW 00:00、endTime = TOMORROW+7 23:59，timeZone Asia/Taipei）。
 2. `involves_me`：標題或描述中有「宇群」才是 true，其他都是 false。
 3. 寫入 `pa_calendar_events`，`on conflict (user_id, source, external_id, start_at) do update` 更新 calendar_name、title、end_at、all_day、involves_me、synced_at。**不要覆寫 `involves_me_override`**。
-4. 刪除這個時間範圍內、這次沒看到的舊行程（被取消了）。
+4. 刪除這個時間範圍內、這次沒看到的舊 Google 行程（`source = 'google'`，代表被取消了）。**絕對不要刪除或修改 `source = 'apple'` 的資料**。
+
+> Apple 個人行事曆由資料庫每 30 分鐘自動同步進 `pa_calendar_events`（`source = 'apple'`），每一筆都是宇群自己的行程（`involves_me = true`）。擬明天的排程時一起避開。
 
 ### 2. 整理收件匣
 

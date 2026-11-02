@@ -1,126 +1,143 @@
-// 個人工作助理｜行事曆同步（第 0 階段：只驗證讀得到，不存行程內容）
+// 個人工作助理｜Apple 行事曆同步
+//
+// 由資料庫排程（pg_cron）每 30 分鐘呼叫一次。讀取 iCloud 行事曆未來幾天的行程，
+// 寫進 pa_calendar_events（source = 'apple'）。Apple 行事曆是宇群的個人行事曆，所以每筆都算他的行程。
+// Google 教室行事曆由早晚雲端排程透過連接器同步（source = 'google'），這裡不碰。
 //
 // 需要的 Supabase secrets（由使用者自行設定，不經過對話）：
-//   GOOGLE_ICAL_URLS    Google 行事曆的「iCal 格式私密網址」，多個用逗號分隔
 //   APPLE_ID            Apple ID（Email）
 //   APPLE_APP_PASSWORD  iCloud 的 App 專用密碼
 //
-// 回傳與寫入 pa_healthcheck 的只有數量，不含行程標題。
+// 回傳與寫入 pa_healthcheck 的只有數量，不含行程內容。
 
 import "jsr:@supabase/functions-js/edge-runtime.d.ts";
 import { createClient } from "npm:@supabase/supabase-js@2";
 import ICAL from "npm:ical.js@2";
 import { createDAVClient } from "npm:tsdav@2";
 
-const DAYS_AHEAD = 7;
+const DAYS_AHEAD = 8;
+const TZ_OFFSET = "+08:00";
 
-type SourceResult = {
-  ok: boolean;
-  calendars?: number;
-  events?: number;
-  error?: string;
+type Occurrence = {
+  external_id: string;
+  calendar_name: string | null;
+  title: string | null;
+  start_at: string;
+  end_at: string;
+  all_day: boolean;
 };
 
-// 解析 iCalendar 文字，展開重複行程，回傳區間內的行程數
-function countEvents(icsText: string, start: Date, end: Date): number {
-  const root = new ICAL.Component(ICAL.parse(icsText));
-  for (const tz of root.getAllSubcomponents("vtimezone")) {
-    ICAL.TimezoneService.register(tz);
+// ICAL.Time → ISO 字串；整天的行程以台北時間的午夜表示
+function toIso(t: ICAL.Time): string {
+  if (t.isDate) {
+    const d = `${t.year}-${String(t.month).padStart(2, "0")}-${String(t.day).padStart(2, "0")}`;
+    return `${d}T00:00:00${TZ_OFFSET}`;
   }
+  return t.toJSDate().toISOString();
+}
+
+// 解析一個 iCalendar 物件，展開區間內的每一次行程（含重複行程與單次修改）
+function occurrences(icsText: string, calendarName: string | null, start: Date, end: Date): Occurrence[] {
+  const root = new ICAL.Component(ICAL.parse(icsText));
+  for (const tz of root.getAllSubcomponents("vtimezone")) ICAL.TimezoneService.register(tz);
 
   const rangeStart = ICAL.Time.fromJSDate(start, true);
   const rangeEnd = ICAL.Time.fromJSDate(end, true);
-  let count = 0;
+  const vevents = root.getAllSubcomponents("vevent");
+  const masters = vevents.filter((v) => !v.hasProperty("recurrence-id"));
+  const exceptions = vevents.filter((v) => v.hasProperty("recurrence-id"));
+  const out: Occurrence[] = [];
 
-  for (const vevent of root.getAllSubcomponents("vevent")) {
-    // 重複行程的單次修改（RECURRENCE-ID）由主行程展開時處理
-    if (vevent.hasProperty("recurrence-id")) continue;
-    const event = new ICAL.Event(vevent);
+  for (const master of masters) {
+    const uid = String(master.getFirstPropertyValue("uid") ?? "");
+    const event = new ICAL.Event(master, {
+      exceptions: exceptions.filter((e) => String(e.getFirstPropertyValue("uid")) === uid),
+    });
+    const push = (s: ICAL.Time, e: ICAL.Time, summary: string | null) => {
+      if (e.compare(rangeStart) <= 0 || s.compare(rangeEnd) >= 0) return;
+      out.push({
+        external_id: uid,
+        calendar_name: calendarName,
+        title: summary,
+        start_at: toIso(s),
+        end_at: toIso(e),
+        all_day: s.isDate,
+      });
+    };
 
     if (!event.isRecurring()) {
-      if (event.endDate.compare(rangeStart) > 0 && event.startDate.compare(rangeEnd) < 0) count++;
+      push(event.startDate, event.endDate, event.summary ?? null);
       continue;
     }
-
     const it = event.iterator();
     for (let next = it.next(); next && next.compare(rangeEnd) < 0; next = it.next()) {
       const occ = event.getOccurrenceDetails(next);
-      if (occ.endDate.compare(rangeStart) > 0) count++;
+      push(occ.startDate, occ.endDate, occ.item.summary ?? null);
     }
   }
-  return count;
-}
-
-async function syncGoogle(start: Date, end: Date): Promise<SourceResult> {
-  const urls = (Deno.env.get("GOOGLE_ICAL_URLS") ?? "").split(",").map((u) => u.trim()).filter(Boolean);
-  if (urls.length === 0) return { ok: false, error: "GOOGLE_ICAL_URLS 未設定" };
-
-  let events = 0;
-  for (const url of urls) {
-    const res = await fetch(url);
-    if (!res.ok) return { ok: false, error: `iCal 網址回應 ${res.status}` };
-    events += countEvents(await res.text(), start, end);
-  }
-  return { ok: true, calendars: urls.length, events };
-}
-
-async function syncApple(start: Date, end: Date): Promise<SourceResult> {
-  const username = Deno.env.get("APPLE_ID");
-  const password = Deno.env.get("APPLE_APP_PASSWORD");
-  if (!username || !password) return { ok: false, error: "APPLE_ID 或 APPLE_APP_PASSWORD 未設定" };
-
-  const client = await createDAVClient({
-    serverUrl: "https://caldav.icloud.com",
-    credentials: { username, password },
-    authMethod: "Basic",
-    defaultAccountType: "caldav",
-  });
-
-  const calendars = (await client.fetchCalendars()).filter((c) =>
-    !c.components || c.components.includes("VEVENT")
-  );
-
-  let events = 0;
-  for (const calendar of calendars) {
-    const objects = await client.fetchCalendarObjects({
-      calendar,
-      timeRange: { start: start.toISOString(), end: end.toISOString() },
-    });
-    for (const obj of objects) {
-      if (obj.data) events += countEvents(obj.data, start, end);
-    }
-  }
-  return { ok: true, calendars: calendars.length, events };
-}
-
-async function safely(fn: () => Promise<SourceResult>): Promise<SourceResult> {
-  try {
-    return await fn();
-  } catch (e) {
-    return { ok: false, error: e instanceof Error ? e.message : String(e) };
-  }
+  return out;
 }
 
 Deno.serve(async () => {
-  const start = new Date();
-  const end = new Date(start.getTime() + DAYS_AHEAD * 24 * 60 * 60 * 1000);
+  const supabase = createClient(Deno.env.get("SUPABASE_URL")!, Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!);
+  const log = async (note: unknown) =>
+    void (await supabase.from("pa_healthcheck").insert({ source: "apple-calendar-sync", note: JSON.stringify(note) }));
 
-  const [google, apple] = await Promise.all([
-    safely(() => syncGoogle(start, end)),
-    safely(() => syncApple(start, end)),
-  ]);
-  const result = { days: DAYS_AHEAD, google, apple };
+  const username = Deno.env.get("APPLE_ID");
+  const password = Deno.env.get("APPLE_APP_PASSWORD");
+  if (!username || !password) {
+    return Response.json({ ok: false, error: "APPLE_ID 或 APPLE_APP_PASSWORD 未設定" });
+  }
 
-  const supabase = createClient(
-    Deno.env.get("SUPABASE_URL")!,
-    Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!,
-  );
-  await supabase.from("pa_healthcheck").insert({
-    source: "calendar-sync",
-    note: JSON.stringify(result),
-  });
+  const { data: owner } = await supabase.from("pa_profile").select("user_id").limit(1).maybeSingle();
+  if (!owner) return Response.json({ ok: false, error: "還沒有擁有者帳號" });
 
-  return new Response(JSON.stringify(result), {
-    headers: { "Content-Type": "application/json" },
-  });
+  const syncStartedAt = new Date().toISOString();
+  const start = new Date(new Date().toLocaleDateString("sv-SE", { timeZone: "Asia/Taipei" }) + `T00:00:00${TZ_OFFSET}`);
+  const end = new Date(start.getTime() + DAYS_AHEAD * 86400_000);
+
+  try {
+    const client = await createDAVClient({
+      serverUrl: "https://caldav.icloud.com",
+      credentials: { username, password },
+      authMethod: "Basic",
+      defaultAccountType: "caldav",
+    });
+    const calendars = (await client.fetchCalendars()).filter((c) => !c.components || c.components.includes("VEVENT"));
+
+    const rows: Occurrence[] = [];
+    for (const calendar of calendars) {
+      const name = typeof calendar.displayName === "string" ? calendar.displayName : null;
+      const objects = await client.fetchCalendarObjects({
+        calendar,
+        timeRange: { start: start.toISOString(), end: end.toISOString() },
+      });
+      for (const obj of objects) if (obj.data) rows.push(...occurrences(obj.data, name, start, end));
+    }
+
+    if (rows.length > 0) {
+      const { error } = await supabase.from("pa_calendar_events").upsert(
+        rows.map((r) => ({ ...r, user_id: owner.user_id, source: "apple", involves_me: true, synced_at: syncStartedAt })),
+        { onConflict: "user_id,source,external_id,start_at", ignoreDuplicates: false },
+      );
+      if (error) throw new Error(error.message);
+    }
+
+    // 這次沒看到的 Apple 行程（被取消或移走）從快取刪掉；只動 source = 'apple'
+    await supabase
+      .from("pa_calendar_events")
+      .delete()
+      .eq("source", "apple")
+      .gte("start_at", start.toISOString())
+      .lt("start_at", end.toISOString())
+      .lt("synced_at", syncStartedAt);
+
+    const result = { ok: true, calendars: calendars.length, events: rows.length, days: DAYS_AHEAD };
+    await log(result);
+    return Response.json(result);
+  } catch (e) {
+    const result = { ok: false, error: e instanceof Error ? e.message : String(e) };
+    await log(result);
+    return Response.json(result, { status: 500 });
+  }
 });

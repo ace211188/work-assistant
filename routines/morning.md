@@ -19,7 +19,9 @@
 2. 每筆行程判斷 `involves_me`：標題或描述中有「宇群」才是 true，其他都是 false（教室行事曆多半是各教室排課，和宇群無關）。
 3. 寫入 `pa_calendar_events`（user_id、source='google'、external_id=事件 id、calendar_name、title、start_at、end_at、all_day、involves_me、synced_at=now()），
    `on conflict (user_id, source, external_id, start_at) do update` 更新 calendar_name、title、end_at、all_day、involves_me、synced_at。**不要覆寫 `involves_me_override`**（那是使用者的修正）。
-4. 刪除這個時間範圍內、這次沒看到的舊行程（`start_at` 在範圍內且 `synced_at` 早於這次開始同步的時間），這代表行程被取消了。
+4. 刪除這個時間範圍內、這次沒看到的舊 Google 行程（`source = 'google'`、`start_at` 在範圍內且 `synced_at` 早於這次開始同步的時間），這代表行程被取消了。**絕對不要刪除或修改 `source = 'apple'` 的資料**。
+
+> Apple 個人行事曆由資料庫每 30 分鐘自動同步進 `pa_calendar_events`（`source = 'apple'`），每一筆都是宇群自己的行程（`involves_me = true`）。計算空檔、排程時一起避開。
 
 ### 2. 整理收件匣
 

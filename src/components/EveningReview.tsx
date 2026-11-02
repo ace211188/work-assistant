@@ -185,7 +185,7 @@ export default function EveningReview({
 
       <h2 className="sec">{c.ask_private ?? "明天有私人行程嗎？"}</h2>
       <form onSubmit={savePrivate} className="card space-y-2">
-        <p className="meta">Apple 行事曆還沒接上，私人行程先記在這裡，排程時會避開。</p>
+        <p className="meta">Apple 行事曆上的行程會自動避開；沒記在行事曆上的，可以在這裡補一筆。</p>
         <div className="num flex items-center gap-2">
           <input type="time" value={privateForm.start} onChange={(e) => setPrivateForm({ ...privateForm, start: e.target.value })} aria-label="開始時間" className="field w-auto py-1" />
           <span>–</span>
