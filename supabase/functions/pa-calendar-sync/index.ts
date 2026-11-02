@@ -83,10 +83,33 @@ Deno.serve(async () => {
   const log = async (note: unknown) =>
     void (await supabase.from("pa_healthcheck").insert({ source: "apple-calendar-sync", note: JSON.stringify(note) }));
 
-  const username = Deno.env.get("APPLE_ID");
-  const password = Deno.env.get("APPLE_APP_PASSWORD");
+  // 貼上時常會多帶空白或換行，先清掉
+  const username = Deno.env.get("APPLE_ID")?.trim();
+  const password = Deno.env.get("APPLE_APP_PASSWORD")?.replace(/\s/g, "");
   if (!username || !password) {
     return Response.json({ ok: false, error: "APPLE_ID 或 APPLE_APP_PASSWORD 未設定" });
+  }
+
+  // 先單獨確認登入，讓錯誤訊息比 tsdav 的「cannot find homeUrl」清楚；只回報狀態，不含帳密
+  const probe = await fetch("https://caldav.icloud.com/", {
+    method: "PROPFIND",
+    headers: {
+      Authorization: `Basic ${btoa(`${username}:${password}`)}`,
+      Depth: "0",
+      "Content-Type": "application/xml; charset=utf-8",
+    },
+    body: `<?xml version="1.0"?><d:propfind xmlns:d="DAV:"><d:prop><d:current-user-principal/></d:prop></d:propfind>`,
+  });
+  await probe.body?.cancel();
+  if (probe.status === 401) {
+    const result = {
+      ok: false,
+      error: "iCloud 登入失敗（401）",
+      apple_id_is_email: username.includes("@"),
+      password_looks_app_specific: /^[a-z]{4}-?[a-z]{4}-?[a-z]{4}-?[a-z]{4}$/.test(password),
+    };
+    await log(result);
+    return Response.json(result, { status: 500 });
   }
 
   const { data: owner } = await supabase.from("pa_profile").select("user_id").limit(1).maybeSingle();
