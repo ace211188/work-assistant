@@ -46,6 +46,13 @@ export async function enablePush(): Promise<"ok" | "denied" | "unsupported"> {
   return "ok";
 }
 
+// 開 App 時把已開啟通知的裝置重新綁到目前帳號（例如登入前就開啟過通知的裝置）
+export async function rebindPush() {
+  if (!pushSupported() || Notification.permission !== "granted") return;
+  const sub = await currentSubscription();
+  if (sub) await callFn({ action: "subscribe", subscription: sub.toJSON() });
+}
+
 export async function sendTestPush() {
   const sub = await currentSubscription();
   if (!sub) throw new Error("這台裝置還沒開啟通知");

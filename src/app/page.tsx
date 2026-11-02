@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { useAuth } from "@/lib/useAuth";
 import { useAssistantData } from "@/lib/useData";
 import { supabase } from "@/lib/supabase";
+import { rebindPush } from "@/lib/push";
 import Login from "@/components/Login";
 import Today from "@/components/Today";
 import Todos from "@/components/Todos";
@@ -29,6 +30,10 @@ export default function Home() {
     else if (hash === "settings") setTab("settings");
     else if (hash === "morning" || hash === "evening") setTodayMode(hash);
   }, []);
+
+  useEffect(() => {
+    if (owner === "owner") rebindPush().catch(() => {});
+  }, [owner]);
 
   if (loading) return null;
   if (!session) return <Login />;
