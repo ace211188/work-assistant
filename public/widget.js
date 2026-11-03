@@ -3,6 +3,9 @@
 // 用法：在 Scriptable 新增一個腳本，貼上這整段程式碼，在 App 裡執行一次並貼上金鑰
 // （金鑰在個人助理 App 的「設定 → Widget」產生），再到主畫面加入 Scriptable 小工具、選這個腳本。
 // 金鑰只存在這支 iPhone 的鑰匙圈，不會寫進程式碼。
+//
+// 點小工具想直接打開主畫面上的 App：在「捷徑」App 建一個只有「打開 App → 個人助理」的捷徑，
+// 再到小工具的「編輯小工具 → Parameter」填那個捷徑的名稱。沒填就用 Safari 打開網站。
 
 const API = "https://gffemhrthwdnajdpkwsq.supabase.co/functions/v1/pa-widget";
 // 公開的 anon key（App 本身也用這把）；真正的權限由下面的小工具金鑰決定
@@ -44,7 +47,8 @@ function build(data, size) {
   const w = new ListWidget();
   w.backgroundColor = new Color(data?.color ?? "#566655");
   w.setPadding(14, 16, 14, 16);
-  w.url = APP_URL;
+  const shortcut = (args.widgetParameter ?? "").trim();
+  w.url = shortcut ? `shortcuts://run-shortcut?name=${encodeURIComponent(shortcut)}` : APP_URL;
   w.refreshAfterDate = new Date(Date.now() + 15 * 60 * 1000);
 
   if (!data || data.error) {
