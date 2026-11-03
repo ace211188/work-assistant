@@ -1,12 +1,13 @@
 # 雲端排程
 
-三個 Claude 雲端排程（routine）負責所有需要 AI 的工作，網頁 App 本身不呼叫 AI。完整重建步驟見 [../重建手冊.md](../重建手冊.md)。
+四個 Claude 雲端排程（routine）負責所有需要 AI 的工作，網頁 App 本身不呼叫 AI。完整重建步驟見 [../重建手冊.md](../重建手冊.md)。
 
 | 排程 | 時間（台北） | cron（UTC） | 指令 |
 |---|---|---|---|
 | 個人助理｜早上 | 每天 7:00 | `0 23 * * *` | [morning.md](morning.md) |
 | 個人助理｜中午 | 每天 12:00 | `0 4 * * *` | [midday.md](midday.md) |
 | 個人助理｜晚上 | 每天 22:00 | `0 14 * * *` | [evening.md](evening.md) |
+| 個人助理｜回饋 | 08:30–21:30 每小時 | `30 0-13 * * *` | [feedback.md](feedback.md) |
 
 - 連接器只開 **Supabase**（讀寫 `pa_` 表格）和 **Google Calendar**（只讀教室行事曆；中午不需要）
 - **排程絕對不下 `DELETE`**：Supabase 連接器會要求人工確認，排程沒人能按會卡住
