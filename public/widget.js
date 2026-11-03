@@ -4,8 +4,8 @@
 // （金鑰在個人助理 App 的「設定 → Widget」產生），再到主畫面加入 Scriptable 小工具、選這個腳本。
 // 金鑰只存在這支 iPhone 的鑰匙圈，不會寫進程式碼。
 //
-// 點小工具想直接打開主畫面上的 App：在「捷徑」App 建一個只有「打開 App → 個人助理」的捷徑，
-// 再到小工具的「編輯小工具 → Parameter」填那個捷徑的名稱。沒填就用 Safari 打開網站。
+// 點小工具會回到 Scriptable 執行這支腳本，全螢幕打開個人助理（iPhone 不讓小工具直接打開主畫面的網頁 App）。
+// 第一次要在裡面登入一次，之後會記住。
 
 const API = "https://gffemhrthwdnajdpkwsq.supabase.co/functions/v1/pa-widget";
 // 公開的 anon key（App 本身也用這把）；真正的權限由下面的小工具金鑰決定
@@ -47,8 +47,7 @@ function build(data, size) {
   const w = new ListWidget();
   w.backgroundColor = new Color(data?.color ?? "#566655");
   w.setPadding(14, 16, 14, 16);
-  const shortcut = (args.widgetParameter ?? "").trim();
-  w.url = shortcut ? `shortcuts://run-shortcut?name=${encodeURIComponent(shortcut)}` : APP_URL;
+  w.url = `scriptable:///run/${encodeURIComponent(Script.name())}?open=1`;
   w.refreshAfterDate = new Date(Date.now() + 15 * 60 * 1000);
 
   if (!data || data.error) {
@@ -82,22 +81,33 @@ function build(data, size) {
   return w;
 }
 
-let key = Keychain.contains(KEYCHAIN) ? Keychain.get(KEYCHAIN) : null;
-if (!key && config.runsInApp) key = await askForKey();
-
-let data = null;
-if (key) {
-  try {
-    data = await load(key);
-  } catch (e) {
-    data = { error: String(e.message ?? e) };
-    // 在 App 裡執行時金鑰無效，就讓他重新貼一次
-    if (config.runsInApp && /金鑰/.test(data.error) && (await askForKey())) data = await load(Keychain.get(KEYCHAIN));
-  }
+async function openApp() {
+  const web = new WebView();
+  await web.loadURL(APP_URL);
+  await web.present(true);
 }
 
-const size = config.widgetFamily ?? "medium";
-const widget = build(data, size);
-if (config.runsInWidget) Script.setWidget(widget);
-else await widget.presentMedium();
+async function showWidget() {
+  let key = Keychain.contains(KEYCHAIN) ? Keychain.get(KEYCHAIN) : null;
+  if (!key && config.runsInApp) key = await askForKey();
+
+  let data = null;
+  if (key) {
+    try {
+      data = await load(key);
+    } catch (e) {
+      data = { error: String(e.message ?? e) };
+      // 在 App 裡執行時金鑰無效，就讓他重新貼一次
+      if (config.runsInApp && /金鑰/.test(data.error) && (await askForKey())) data = await load(Keychain.get(KEYCHAIN));
+    }
+  }
+
+  const widget = build(data, config.widgetFamily ?? "medium");
+  if (config.runsInWidget) Script.setWidget(widget);
+  else await widget.presentMedium();
+}
+
+// 從小工具點進來（網址帶 open=1）就打開助理，其他時候顯示小工具
+if (args.queryParameters?.open) await openApp();
+else await showWidget();
 Script.complete();
