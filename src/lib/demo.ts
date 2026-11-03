@@ -56,6 +56,20 @@ function sampleData(): Record<string, Row[]> {
         },
       },
       {
+        id: 3, date: today, kind: "midday", status: "draft", created_at: now,
+        content: {
+          summary: "上午回覆了李媽媽，體驗券還沒送印，下午先處理它。",
+          ideas: [{ inbox_id: 10, text: "成果發表會可以請家長幫忙錄影" }],
+          afternoon: {
+            plan: [
+              { todo_id: 1, start: "16:30", end: "17:30", reason: "早上沒做到，今天一定要送出。" },
+              { todo_id: 3, start: "17:30", end: "18:00", reason: "下週一前要公布，先確認兩位老師的時間。" },
+            ],
+            free_slots: [{ start: "16:30", end: "18:00", kind: "work" }],
+          },
+        },
+      },
+      {
         id: 2, date: today, kind: "evening", status: "draft", created_at: now,
         content: {
           summary: "今天完成了兩件事，房租也繳了。體驗券還沒送印，明天上午先處理。",

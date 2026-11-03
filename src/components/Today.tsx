@@ -5,7 +5,7 @@ import { IconChevronDown } from "@tabler/icons-react";
 import { supabase } from "@/lib/supabase";
 import { dayRange, hhmm, taipeiDate, taipeiHour } from "@/lib/time";
 import { sortByUrgency, type AssistantData } from "@/lib/useData";
-import type { Brief, CalendarEvent, EveningContent, MorningContent, Thought, Todo } from "@/lib/types";
+import type { Brief, CalendarEvent, EveningContent, MiddayContent, MorningContent, Thought, Todo } from "@/lib/types";
 import Masthead, { englishDate } from "./Masthead";
 import ThoughtCard from "./ThoughtCard";
 import TodoRow from "./TodoRow";
@@ -14,6 +14,7 @@ import EveningReview from "./EveningReview";
 export default function Today({ data, initialMode }: { data: AssistantData; initialMode?: "morning" | "evening" }) {
   const today = taipeiDate();
   const [morning, setMorning] = useState<Brief<MorningContent> | null>(null);
+  const [midday, setMidday] = useState<Brief<MiddayContent> | null>(null);
   const [evening, setEvening] = useState<Brief<EveningContent> | null>(null);
   const [thought, setThought] = useState<Thought | null>(null);
   const [direction, setDirection] = useState<string | null>(null);
@@ -28,10 +29,11 @@ export default function Today({ data, initialMode }: { data: AssistantData; init
       supabase.from("pa_direction").select("content").order("created_at", { ascending: false }).limit(1).maybeSingle(),
       supabase.from("pa_calendar_events").select("*").is("cancelled_at", null).gte("start_at", from).lte("start_at", to).order("start_at"),
     ]);
-    const briefs = (b.data ?? []) as Brief<MorningContent & EveningContent>[];
+    const briefs = (b.data ?? []) as Brief<MorningContent & MiddayContent & EveningContent>[];
     const m = briefs.find((x) => x.kind === "morning") ?? null;
     const ev = briefs.find((x) => x.kind === "evening") ?? null;
     setMorning(m);
+    setMidday(briefs.find((x) => x.kind === "midday") ?? null);
     setEvening(ev);
     setDirection(d.data?.content ?? null);
     setEvents((e.data as CalendarEvent[]) ?? []);
@@ -79,7 +81,7 @@ export default function Today({ data, initialMode }: { data: AssistantData; init
       ) : (
         <div key={mode} className="view-enter">
           {mode === "morning" ? (
-            <Morning brief={morning} thought={thought} direction={direction} events={events} data={data} />
+            <Morning brief={morning} midday={midday} thought={thought} direction={direction} events={events} data={data} />
           ) : (
             <EveningReview brief={evening} data={data} onConfirmed={load} />
           )}
@@ -91,12 +93,14 @@ export default function Today({ data, initialMode }: { data: AssistantData; init
 
 function Morning({
   brief,
+  midday,
   thought,
   direction,
   events,
   data,
 }: {
   brief: Brief<MorningContent> | null;
+  midday: Brief<MiddayContent> | null;
   thought: Thought | null;
   direction: string | null;
   events: CalendarEvent[];
@@ -108,9 +112,16 @@ function Morning({
   const byId = new Map(data.todos.map((t) => [t.id, t]));
   const toggle = (t: Todo) => data.updateTodo(t.id, { status: t.status === "done" ? "open" : "done" });
 
-  const top = (c.top3 ?? []).map((x) => ({ ...x, todo: byId.get(x.todo_id) })).filter((x) => x.todo);
-  const topIds = new Set(top.map((x) => x.todo_id));
-  const others = sortByUrgency(data.todos.filter((t) => t.status === "open" && !topIds.has(t.id)));
+  // 中午重排過，下午的安排優先；早上的三件事只留下沒被排進下午的（多半是已經完成的）
+  const noon = midday?.content;
+  const afternoon = (noon?.afternoon?.plan ?? []).map((x) => ({ ...x, todo: byId.get(x.todo_id) })).filter((x) => x.todo);
+  const afternoonIds = new Set(afternoon.map((x) => x.todo_id));
+  const top = (c.top3 ?? [])
+    .map((x) => ({ ...x, todo: byId.get(x.todo_id) }))
+    .filter((x) => x.todo && !afternoonIds.has(x.todo_id));
+  const planned = new Set([...afternoonIds, ...top.map((x) => x.todo_id)]);
+  const others = sortByUrgency(data.todos.filter((t) => t.status === "open" && !planned.has(t.id)));
+  const ideas = [...(c.ideas ?? []), ...(noon?.ideas ?? [])];
   const stale = (c.stale ?? []).map((x) => ({ ...x, todo: byId.get(x.todo_id) })).filter((x) => x.todo?.status === "open");
 
   return (
@@ -126,32 +137,36 @@ function Morning({
         </p>
       )}
 
-      <Schedule events={events} slots={c.free_slots} />
+      <Schedule events={events} slots={noon?.afternoon?.free_slots ?? c.free_slots} />
 
-      <h2 className="sec">First three</h2>
+      {midday && (
+        <>
+          <h2 className="sec">
+            <span>This afternoon</span>
+            <span className="meta">中午重排</span>
+          </h2>
+          {noon?.summary && <p className="mb-3 text-[15px] leading-[1.9]">{noon.summary}</p>}
+          {afternoon.length > 0 ? (
+            <div className="space-y-2">
+              {afternoon.map((x) => (
+                <PlanCard key={x.todo_id} todo={x.todo!} onToggle={() => toggle(x.todo!)} slot={x.start ? `${x.start} – ${x.end ?? ""}` : undefined} reason={x.reason} />
+              ))}
+            </div>
+          ) : (
+            <p className="card text-[15px] leading-[1.9]">下午沒有可以排工作的空檔，休息一下也好。</p>
+          )}
+        </>
+      )}
+
+      {(!midday || top.length > 0) && <h2 className="sec">First three</h2>}
       {top.length > 0 ? (
         <div className="space-y-2">
           {top.map((x) => (
-            // 每件事一張卡；左邊的圓圈點一下就完成
-            <div key={x.todo_id} className="card py-1.5">
-              <TodoRow
-                todo={x.todo!}
-                onToggle={() => toggle(x.todo!)}
-                time={x.slot ? "" : undefined}
-                extra={
-                  (x.slot || x.reason) && (
-                    <p className="meta mt-1 leading-relaxed">
-                      {x.slot && <span className="num not-italic">{x.slot}　</span>}
-                      {x.reason}
-                    </p>
-                  )
-                }
-              />
-            </div>
+            <PlanCard key={x.todo_id} todo={x.todo!} onToggle={() => toggle(x.todo!)} slot={x.slot} reason={x.reason} />
           ))}
         </div>
       ) : (
-        <p className="card text-[15px] leading-[1.9]">早上整理過後，助理會挑出今天最該先做的三件事。</p>
+        !midday && <p className="card text-[15px] leading-[1.9]">早上整理過後，助理會挑出今天最該先做的三件事。</p>
       )}
 
       {stale.length > 0 && (
@@ -172,11 +187,11 @@ function Morning({
         </>
       )}
 
-      {(c.ideas?.length ?? 0) > 0 && (
+      {ideas.length > 0 && (
         <>
           <h2 className="sec">Notes to self</h2>
           <ul className="card space-y-2 leading-[1.8]">
-            {c.ideas!.map((i) => (
+            {ideas.map((i) => (
               <li key={i.inbox_id}>{i.text}</li>
             ))}
           </ul>
@@ -203,6 +218,27 @@ function Morning({
 }
 
 // 今天行程：自己的行程直接列出；教室其他課收合；可以修正「這是不是我的行程」
+// 排好時段的一件事，一張卡；左邊的圓圈點一下就完成
+function PlanCard({ todo, onToggle, slot, reason }: { todo: Todo; onToggle: () => void; slot?: string; reason?: string }) {
+  return (
+    <div className="card py-1.5">
+      <TodoRow
+        todo={todo}
+        onToggle={onToggle}
+        time={slot ? "" : undefined}
+        extra={
+          (slot || reason) && (
+            <p className="meta mt-1 leading-relaxed">
+              {slot && <span className="num not-italic">{slot}　</span>}
+              {reason}
+            </p>
+          )
+        }
+      />
+    </div>
+  );
+}
+
 function Schedule({ events, slots }: { events: CalendarEvent[]; slots?: MorningContent["free_slots"] }) {
   const [list, setList] = useState(events);
   const [showClassroom, setShowClassroom] = useState(false);

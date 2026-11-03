@@ -97,10 +97,18 @@ export type EveningContent = {
   user_note?: string;
 };
 
+// 中午 12:00：整理上午記下的事、重排下午
+export type MiddayContent = {
+  summary?: string;
+  new_todo_ids?: number[];
+  ideas?: { inbox_id: number; text: string }[];
+  afternoon?: { plan: PlanItem[]; free_slots?: Slot[] };
+};
+
 export type Brief<C> = {
   id: number;
   date: string;
-  kind: "morning" | "evening";
+  kind: "morning" | "midday" | "evening";
   content: C;
   status: "draft" | "confirmed";
   created_at: string;

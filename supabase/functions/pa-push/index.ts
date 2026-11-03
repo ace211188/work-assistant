@@ -8,7 +8,7 @@
 //   { action: "config" }                       → 回傳 VAPID 公鑰
 //   { action: "subscribe", subscription }      → 保存這台裝置的訂閱（需登入，記在該使用者名下）
 //   { action: "test", endpoint }               → 只發一則測試通知給這台裝置
-//   { action: "brief", brief_id }              → 早晚內容寫入時由資料庫觸發，通知擁有者的所有裝置
+//   { action: "brief", brief_id }              → 早、午、晚內容寫入時由資料庫觸發，通知擁有者的所有裝置（中午只在有 push 時通知）
 // 群發只限「剛寫入、還沒通知過」的早晚內容，每則最多通知一次，所以不需要另外的密鑰。
 
 import "jsr:@supabase/functions-js/edge-runtime.d.ts";
@@ -69,6 +69,8 @@ Deno.serve(async (req) => {
     if (!brief) return json({ error: "找不到這則內容" }, 404);
     const fresh = Date.now() - new Date(brief.created_at).getTime() < 30 * 60 * 1000;
     if (brief.notified_at || !fresh) return json({ ok: true, skipped: true });
+    // 中午的內容「有事才推播」：排程沒寫 push 就代表下午沒有變動，安靜就好
+    if (brief.kind === "midday" && !brief.content?.push) return json({ ok: true, skipped: true, quiet: true });
 
     // 先標記已通知，避免重複觸發時發兩次
     const { data: claimed } = await supabase
@@ -81,6 +83,8 @@ Deno.serve(async (req) => {
 
     const fallback = brief.kind === "morning"
       ? { title: "早安 🌅", body: "今天的思考題和行程整理好了" }
+      : brief.kind === "midday"
+      ? { title: "下午重排好了 ☀️", body: "上午記下的事整理好了，看看下午的安排" }
       : { title: "今天辛苦了 🌙", body: "回顧和明天的排程草稿好了，花 5 分鐘看看" };
     const payload = JSON.stringify({ ...fallback, ...(brief.content?.push ?? {}) });
 
