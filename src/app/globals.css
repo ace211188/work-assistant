@@ -3,6 +3,7 @@
 /* 日系雜誌・霧色：每天一種封面色（data-day 由 layout 的小腳本依台北時間設定，0 = 週日）。
    背景已調暗到白字在卡片上也有 4.5:1 以上的對比；次要文字靠斜體與字級分層，不靠變淡。 */
 :root {
+  --font-garamond: "EB Garamond";
   --bg: #566655;
   --dot: #ffe29a;
   --fg: #ffffff;
