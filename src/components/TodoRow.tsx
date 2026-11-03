@@ -1,5 +1,6 @@
 "use client";
 
+import { IconCheck } from "@tabler/icons-react";
 import { effectiveUrgency, URGENCY_LABEL } from "@/lib/useData";
 import { dateLabel, hhmm } from "@/lib/time";
 import type { Todo } from "@/lib/types";
@@ -10,7 +11,7 @@ export function UrgencyTag({ todo }: { todo: Todo }) {
   return <span className="shrink-0 rounded-[4px] bg-fg px-1.5 text-[12px] leading-5 text-ink">{URGENCY_LABEL.high}</span>;
 }
 
-// 一列待辦：左邊的小圓點就是勾選鈕（點擊範圍 44px）；未完成是實心點，完成後變空心並劃線
+// 一列待辦：左邊的圓圈就是勾選鈕（點擊範圍 44px）；未完成是空心圈，完成後填白、打勾並劃線
 export default function TodoRow({
   todo,
   onToggle,
@@ -36,9 +37,11 @@ export default function TodoRow({
         onClick={onToggle}
         aria-label={done ? `把「${todo.title}」標回未完成` : `完成「${todo.title}」`}
         aria-pressed={done}
-        className="-ml-2.5 flex h-11 w-11 shrink-0 items-center justify-center"
+        className="check -ml-2.5 flex h-11 w-11 shrink-0 items-center justify-center"
       >
-        <span className={`h-[7px] w-[7px] rounded-full transition-colors ${done ? "border border-fg" : "bg-fg"}`} />
+        <span className={`flex h-[22px] w-[22px] items-center justify-center rounded-full border-[1.5px] border-fg transition-colors ${done ? "bg-fg text-ink" : "text-transparent"}`}>
+          <IconCheck size={14} stroke={2.4} />
+        </span>
       </button>
       <div className={`min-w-0 flex-1 py-[11px] ${onClick ? "cursor-pointer" : ""}`} onClick={onClick}>
         <div className="flex items-start gap-3">

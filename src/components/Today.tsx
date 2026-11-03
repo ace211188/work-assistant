@@ -130,22 +130,24 @@ function Morning({
 
       <h2 className="sec">First three</h2>
       {top.length > 0 ? (
-        <div className="card divide-y divide-line py-1">
+        <div className="space-y-2">
           {top.map((x) => (
-            <TodoRow
-              key={x.todo_id}
-              todo={x.todo!}
-              onToggle={() => toggle(x.todo!)}
-              time={x.slot ? "" : undefined}
-              extra={
-                (x.slot || x.reason) && (
-                  <p className="meta mt-1 leading-relaxed">
-                    {x.slot && <span className="num not-italic">{x.slot}　</span>}
-                    {x.reason}
-                  </p>
-                )
-              }
-            />
+            // 每件事一張卡；左邊的圓圈點一下就完成
+            <div key={x.todo_id} className="card py-1.5">
+              <TodoRow
+                todo={x.todo!}
+                onToggle={() => toggle(x.todo!)}
+                time={x.slot ? "" : undefined}
+                extra={
+                  (x.slot || x.reason) && (
+                    <p className="meta mt-1 leading-relaxed">
+                      {x.slot && <span className="num not-italic">{x.slot}　</span>}
+                      {x.reason}
+                    </p>
+                  )
+                }
+              />
+            </div>
           ))}
         </div>
       ) : (

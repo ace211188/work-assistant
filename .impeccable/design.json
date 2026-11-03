@@ -574,9 +574,9 @@
       "name": "Todo Row",
       "kind": "custom",
       "refersTo": "urgency-tag",
-      "description": "7px 圓點就是完成鈕（點擊範圍 44px）；完成後變空心並劃線；只標「急」。",
+      "description": "22px 白框完成圈就是完成鈕（點擊範圍 44px）；完成後填白打勾並劃線；只標「急」。",
       "html": "<div class=\"ds-surface\"><div class=\"ds-card\"><div class=\"ds-row\"><button class=\"ds-dot-btn\" aria-label=\"完成\"><span class=\"ds-dot\"></span></button><span class=\"ds-title\">回覆家長的請假訊息</span><span class=\"ds-tag\">急</span><span class=\"ds-num\">10:30</span></div><div class=\"ds-row ds-done\"><button class=\"ds-dot-btn\" aria-pressed=\"true\" aria-label=\"標回未完成\"><span class=\"ds-dot\"></span></button><span class=\"ds-title\">確認本週排課</span></div></div></div>",
-      "css": ".ds-surface{background: var(--bg, #566655); color: #fff; padding: 20px; font-family: 'EB Garamond', 'Noto Serif TC', serif; font-synthesis-style: none;} .ds-card{background:var(--card, color-mix(in srgb, var(--bg, #566655) 88%, white));border-radius:6px;padding:4px 16px} .ds-row{display:flex;align-items:center;min-height:44px} .ds-row+.ds-row{border-top:1px solid var(--line, rgb(255 255 255 / 0.42))} .ds-dot-btn{margin-left:-10px;width:44px;height:44px;flex:none;display:flex;align-items:center;justify-content:center;background:none;border:0;cursor:pointer} .ds-dot{width:7px;height:7px;border-radius:9999px;background:#fff;box-sizing:border-box;transition:background-color 150ms} .ds-done .ds-dot{background:transparent;border:1px solid #fff} .ds-done .ds-title{text-decoration:line-through;text-decoration-thickness:1px} .ds-title{flex:1;line-height:1.375;padding:11px 12px 11px 0} .ds-tag{background:#fff;color:var(--ink, color-mix(in srgb, var(--bg, #566655) 70%, black));border-radius:4px;padding:0 6px;font-size:12px;line-height:20px;margin-right:12px} .ds-num{font-family:'EB Garamond',serif;font-variant-numeric:lining-nums tabular-nums;font-size:15px} .ds-dot-btn:focus-visible{outline:2px solid #fff;outline-offset:-6px;border-radius:4px}"
+      "css": ".ds-surface{background: var(--bg, #566655); color: #fff; padding: 20px; font-family: 'EB Garamond', 'Noto Serif TC', serif; font-synthesis-style: none;} .ds-card{background:var(--card, color-mix(in srgb, var(--bg, #566655) 88%, white));border-radius:6px;padding:4px 16px} .ds-row{display:flex;align-items:center;min-height:44px} .ds-row+.ds-row{border-top:1px solid var(--line, rgb(255 255 255 / 0.42))} .ds-dot-btn{margin-left:-10px;width:44px;height:44px;flex:none;display:flex;align-items:center;justify-content:center;background:none;border:0;cursor:pointer} .ds-dot{width:22px;height:22px;border-radius:9999px;border:1.5px solid #fff;box-sizing:border-box;transition:background-color 160ms,transform 160ms} .ds-dot-btn:active .ds-dot{transform:scale(0.86)} .ds-done .ds-dot{background:#fff} .ds-done .ds-title{text-decoration:line-through;text-decoration-thickness:1px} .ds-title{flex:1;line-height:1.375;padding:11px 12px 11px 0} .ds-tag{background:#fff;color:var(--ink, color-mix(in srgb, var(--bg, #566655) 70%, black));border-radius:4px;padding:0 6px;font-size:12px;line-height:20px;margin-right:12px} .ds-num{font-family:'EB Garamond',serif;font-variant-numeric:lining-nums tabular-nums;font-size:15px} .ds-dot-btn:focus-visible{outline:2px solid #fff;outline-offset:-6px;border-radius:4px}"
     },
     {
       "name": "Schedule Row",
@@ -613,13 +613,13 @@
   ],
   "narrative": {
     "northStar": "每日霧色封面的生活雜誌（The Daily Mist Cover）",
-    "overview": "整個 App 是一本每天換封面色的日系生活雜誌。打開時整個畫面是一片當天的霧色，左上角是斜體大字的英文星期當刊頭，下面一行大寫字距的日期；往下翻，先讀到「Thought of the day」，才是行程與最該先做的三件事。顏色本身就是日期：一週七種霧色，看一眼就知道今天星期幾。\n\n材質是平的紙：同色系提亮一階的卡片、6px 小圓角、不加陰影；層次靠卡片色階與一條半透明白細線，不靠投影。文字一律白色，英文與數字用 EB Garamond（刊頭用真正的斜體，分段標題用正體），中文用思源宋體（明體），中文永遠保持正體。次要資訊靠縮小一號與斜體分層，不靠變淡。版面是單欄、手機優先，密度鬆，行高寬，像在讀雜誌而不是掃清單。\n\n唯一會「表演」的地方是底部浮起的工具列：按右下角的白色＋，整條工具列從＋的位置展開成輸入框。其他動作只有短促的按壓回饋。明確拒絕的預設：白底清單加圓形勾選框的待辦 App 外觀。",
+    "overview": "整個 App 是一本每天換封面色的日系生活雜誌。打開時整個畫面是一片當天的霧色，左上角是斜體大字的英文星期當刊頭，下面一行大寫字距的日期；往下翻，先讀到「Thought of the day」，才是行程與最該先做的三件事。顏色本身就是日期：一週七種霧色，看一眼就知道今天星期幾。\n\n材質是平的紙：同色系提亮一階的卡片、6px 小圓角、不加陰影；層次靠卡片色階與一條半透明白細線，不靠投影。文字一律白色，英文與數字用 EB Garamond（刊頭用真正的斜體，分段標題用正體），中文用思源宋體（明體），中文永遠保持正體。次要資訊靠縮小一號與斜體分層，不靠變淡。版面是單欄、手機優先，密度鬆，行高寬，像在讀雜誌而不是掃清單。\n\n唯一會「表演」的地方是底部浮起的工具列：按右下角的白色＋，整條工具列從＋的位置展開成輸入框。其他動作只有短促的按壓回饋。明確拒絕的預設：白底清單的待辦 App 外觀。",
     "keyCharacteristics": [
       "每天一種霧色封面（`[data-day]`，0 = 週日），所有表面色都從當天的 `--bg` 推導。",
       "白字在卡片上至少 4.5:1；工具列上約 8:1。",
       "EB Garamond 斜體刊頭、正體分段標題，思源宋體正體中文，`font-synthesis-style: none`。",
       "平面卡片：6px 圓角、沒有陰影；唯一的陰影屬於浮起的底部工具列。",
-      "項目前面是 7px 小圓點，圓點本身就是完成鈕；自己的行程用當天的暖色點。",
+      "待辦前面是 22px 的白框完成圈（使用者要求：一眼看得出可以按）；自己的行程用當天的暖色 7px 點。",
       "一個招牌動畫（＋展開成輸入框），尊重減少動態效果設定。",
       "所有觸控目標至少 44px。"
     ],
@@ -666,7 +666,7 @@
       },
       {
         "name": "The Dot Rule",
-        "body": "項目標記是 7px 小圓點，不是勾選框。待辦：未完成是白色實心點，完成後變成白框空心點並劃線。行程：自己的行程是當天點綴色的實心點，教室其他課是白框空心點。",
+        "body": "待辦的標記是 22px、1.5px 白框的完成圈（2026-11-03 使用者反映看不出怎麼標記完成，從 7px 圓點改來）：未完成是空心圈，完成後填白、墨色打勾並劃線，按下時縮到 0.86 倍。行程仍用 7px 圓點：自己的行程是當天點綴色的實心點，教室其他課是白框空心點。",
         "section": "shapes"
       },
       {
@@ -688,7 +688,7 @@
       "Don't 給卡片、輸入框或列表加陰影；陰影只屬於浮起的底部工具列。",
       "Don't 用透明度把次要文字變淡；透明度只留給停用狀態、placeholder 與細線。",
       "Don't 讓中文變成斜體，或拿掉 `font-synthesis-style: none`。",
-      "Don't 用方形或圓形勾選框取代 7px 圓點；不要做成白底清單的待辦 App。",
+      "Don't 用方形勾選框，也不要做成白底清單的待辦 App；完成圈維持白框圓形。",
       "Don't 用紅色或警示色標示急件或拖延；急件只用白底墨字的小標籤。",
       "Don't 把點綴色用在文字、底色或按鈕上。",
       "Don't 把卡片調得比現在更淺又放白色內文（78% 混白時只有約 3.7:1，低於 4.5:1）。",

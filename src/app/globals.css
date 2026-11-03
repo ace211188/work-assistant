@@ -227,6 +227,14 @@ html {
   transition: transform 380ms cubic-bezier(0.16, 1, 0.3, 1);
 }
 
+/* 完成圈：按下去會輕輕縮一下，讓手指知道有按到 */
+.check > span {
+  transition: transform 160ms ease-out, background-color 160ms ease-out, color 160ms ease-out;
+}
+.check:active > span {
+  transform: scale(0.86);
+}
+
 @media (prefers-reduced-motion: reduce) {
   *,
   *::before,
