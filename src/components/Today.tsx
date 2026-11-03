@@ -26,7 +26,7 @@ export default function Today({ data, initialMode }: { data: AssistantData; init
     const [b, d, e] = await Promise.all([
       supabase.from("pa_briefs").select("*").eq("date", today),
       supabase.from("pa_direction").select("content").order("created_at", { ascending: false }).limit(1).maybeSingle(),
-      supabase.from("pa_calendar_events").select("*").gte("start_at", from).lte("start_at", to).order("start_at"),
+      supabase.from("pa_calendar_events").select("*").is("cancelled_at", null).gte("start_at", from).lte("start_at", to).order("start_at"),
     ]);
     const briefs = (b.data ?? []) as Brief<MorningContent & EveningContent>[];
     const m = briefs.find((x) => x.kind === "morning") ?? null;

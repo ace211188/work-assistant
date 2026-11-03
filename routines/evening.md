@@ -10,6 +10,7 @@
 - 先跑 `TZ=Asia/Taipei date +%F` 取得今天日期（TODAY），明天是 TOMORROW。所有日期都以台北時間為準。
 - 先查 `select user_id from pa_profile limit 1;` 取得 USER_ID。查不到就寫一筆 healthcheck（source='routine-evening', note='no owner'）後結束。
 - 不要刪除任何待辦；不要替他把待辦標成完成或不做（那是他在 App 上決定的），除非收件匣明確說某件事做完了。
+- **絕對不要下 `DELETE`**（Supabase 連接器會要求人工確認，排程沒人能按，整個流程會卡住）。要移除的資料一律用 `UPDATE ... WHERE` 標記，真正的刪除由資料庫每天自動處理。
 
 ## 步驟
 
@@ -17,10 +18,12 @@
 
 1. `list_calendars`，再對每個行事曆 `list_events`（startTime = TOMORROW 00:00、endTime = TOMORROW+7 23:59，timeZone Asia/Taipei）。
 2. `involves_me`：標題或描述中有「宇群」才是 true，其他都是 false。
-3. 寫入 `pa_calendar_events`，`on conflict (user_id, source, external_id, start_at) do update` 更新 calendar_name、title、end_at、all_day、involves_me、synced_at。**不要覆寫 `involves_me_override`**。
-4. 刪除這個時間範圍內、這次沒看到的舊 Google 行程（`source = 'google'`，代表被取消了）。**絕對不要刪除或修改 `source = 'apple'` 的資料**。
+3. 寫入 `pa_calendar_events`，`on conflict (user_id, source, external_id, start_at) do update` 更新 calendar_name、title、end_at、all_day、involves_me、synced_at，並把 `cancelled_at` 設回 null。**不要覆寫 `involves_me_override`**。
+4. 這個時間範圍內、這次沒看到的舊 Google 行程代表被取消了，**用 UPDATE 標記，不要刪除**：
+   `update pa_calendar_events set cancelled_at = now() where source = 'google' and cancelled_at is null and start_at` 在範圍內 `and synced_at <` 這次開始同步的時間。**絕對不要修改 `source = 'apple'` 的資料**。
 
 > Apple 個人行事曆由資料庫每 30 分鐘自動同步進 `pa_calendar_events`（`source = 'apple'`），每一筆都是宇群自己的行程（`involves_me = true`）。擬明天的排程時一起避開。
+> 之後所有讀取行事曆的地方都要加 `cancelled_at is null`，已取消的行程不算。
 
 ### 2. 整理收件匣
 
@@ -40,7 +43,7 @@
 ### 4. 擬明天的排程草稿
 
 1. 明天的工作時段：`pa_work_hours` 中 weekday = 明天星期幾（0=週日）的所有區段；沒有設定就當作休息日，排程留空。
-2. 扣掉宇群自己的行程（`coalesce(involves_me_override, involves_me) = true`，非整天）和 `pa_exceptions` 明天 kind='rest' 的時段；加上 kind='work' 的時段。結果寫成 `tomorrow.free_slots`。
+2. 扣掉宇群自己的行程（`coalesce(involves_me_override, involves_me) = true`、`cancelled_at is null`，非整天）和 `pa_exceptions` 明天 kind='rest' 的時段；加上 kind='work' 的時段。結果寫成 `tomorrow.free_slots`。
 3. 從未完成待辦中挑 3～5 件排進可工作的空檔，每件給 start、end（HH:MM）和一句理由。考慮：有效緊急程度（`coalesce(urgency_override, urgency_ai)`）、截止日、今天沒完成的、`planned_date = TOMORROW` 的、延後次數。
    - 一次不要排太滿，留緩衝；最難、最重要的放在他精神較好的時段
    - 已經 `planned_date = TOMORROW` 的待辦優先放進去

@@ -10,6 +10,7 @@
 - 先跑 `TZ=Asia/Taipei date +%F` 取得今天日期（下稱 TODAY），所有日期都以台北時間為準。
 - 先查 `select user_id from pa_profile limit 1;` 取得 USER_ID。查不到就寫一筆 healthcheck（source='routine-morning', note='no owner'）後結束。
 - 不要刪除任何待辦；不確定的事寧可不做。
+- **絕對不要下 `DELETE`**（Supabase 連接器會要求人工確認，排程沒人能按，整個流程會卡住）。要移除的資料一律用 `UPDATE ... WHERE` 標記，真正的刪除由資料庫每天自動處理。
 
 ## 步驟
 
@@ -18,10 +19,12 @@
 1. `list_calendars`，再對每個行事曆 `list_events`（startTime = TODAY 00:00、endTime = TODAY+7 23:59，timeZone Asia/Taipei）。
 2. 每筆行程判斷 `involves_me`：標題或描述中有「宇群」才是 true，其他都是 false（教室行事曆多半是各教室排課，和宇群無關）。
 3. 寫入 `pa_calendar_events`（user_id、source='google'、external_id=事件 id、calendar_name、title、start_at、end_at、all_day、involves_me、synced_at=now()），
-   `on conflict (user_id, source, external_id, start_at) do update` 更新 calendar_name、title、end_at、all_day、involves_me、synced_at。**不要覆寫 `involves_me_override`**（那是使用者的修正）。
-4. 刪除這個時間範圍內、這次沒看到的舊 Google 行程（`source = 'google'`、`start_at` 在範圍內且 `synced_at` 早於這次開始同步的時間），這代表行程被取消了。**絕對不要刪除或修改 `source = 'apple'` 的資料**。
+   `on conflict (user_id, source, external_id, start_at) do update` 更新 calendar_name、title、end_at、all_day、involves_me、synced_at，並把 `cancelled_at` 設回 null。**不要覆寫 `involves_me_override`**（那是使用者的修正）。
+4. 這個時間範圍內、這次沒看到的舊 Google 行程代表被取消了，**用 UPDATE 標記，不要刪除**：
+   `update pa_calendar_events set cancelled_at = now() where source = 'google' and cancelled_at is null and start_at` 在範圍內 `and synced_at <` 這次開始同步的時間。**絕對不要修改 `source = 'apple'` 的資料**。
 
 > Apple 個人行事曆由資料庫每 30 分鐘自動同步進 `pa_calendar_events`（`source = 'apple'`），每一筆都是宇群自己的行程（`involves_me = true`）。計算空檔、排程時一起避開。
+> 之後所有讀取行事曆的地方都要加 `cancelled_at is null`，已取消的行程不算。
 
 ### 2. 整理收件匣
 
@@ -51,7 +54,7 @@
 ### 5. 計算今天的空檔
 
 - 今天的工作時段：`pa_work_hours` 中 weekday = 今天星期幾（0=週日）的所有區段。沒有設定就當作今天休息。
-- 扣掉：宇群自己的行程（`coalesce(involves_me_override, involves_me) = true`，非整天）、`pa_exceptions` 今天 kind='rest' 的時段（start_time 為空代表整天休息）。
+- 扣掉：宇群自己的行程（`coalesce(involves_me_override, involves_me) = true`、`cancelled_at is null`，非整天）、`pa_exceptions` 今天 kind='rest' 的時段（start_time 為空代表整天休息）。
 - 加上：`pa_exceptions` 今天 kind='work' 的時段。
 - 結果寫成 `free_slots`（kind='work'）；工作時段外的較長空白可以標 kind='rest' 提醒他休息，但不要排工作進去。
 
