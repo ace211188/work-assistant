@@ -5,7 +5,8 @@ import { IconChevronDown } from "@tabler/icons-react";
 import { supabase } from "@/lib/supabase";
 import { dayRange, hhmm, taipeiDate, taipeiHour } from "@/lib/time";
 import { sortByUrgency, type AssistantData } from "@/lib/useData";
-import type { Brief, CalendarEvent, EveningContent, MiddayContent, MorningContent, Thought, Todo } from "@/lib/types";
+import type { Brief, CalendarEvent, EveningContent, Feedback, MiddayContent, MorningContent, Thought, Todo } from "@/lib/types";
+import FeedbackList from "./FeedbackList";
 import Masthead, { englishDate } from "./Masthead";
 import ThoughtCard from "./ThoughtCard";
 import TodoRow from "./TodoRow";
@@ -19,16 +20,26 @@ export default function Today({ data, initialMode }: { data: AssistantData; init
   const [thought, setThought] = useState<Thought | null>(null);
   const [direction, setDirection] = useState<string | null>(null);
   const [events, setEvents] = useState<CalendarEvent[]>([]);
+  const [feedback, setFeedback] = useState<Feedback[]>([]);
   const [loaded, setLoaded] = useState(false);
   const [mode, setMode] = useState<"morning" | "evening">(initialMode ?? (taipeiHour() >= 21 ? "evening" : "morning"));
 
   const load = useCallback(async () => {
     const { from, to } = dayRange(today);
-    const [b, d, e] = await Promise.all([
+    const [b, d, e, f] = await Promise.all([
       supabase.from("pa_briefs").select("*").eq("date", today),
       supabase.from("pa_direction").select("content").order("created_at", { ascending: false }).limit(1).maybeSingle(),
       supabase.from("pa_calendar_events").select("*").is("cancelled_at", null).gte("start_at", from).lte("start_at", to).order("start_at"),
+      // 還沒按「收到」的回饋，最近 7 天
+      supabase
+        .from("pa_feedback")
+        .select("*")
+        .is("dismissed_at", null)
+        .gte("created_at", new Date(Date.now() - 7 * 86400_000).toISOString())
+        .order("created_at", { ascending: false })
+        .limit(10),
     ]);
+    setFeedback((f.data as Feedback[]) ?? []);
     const briefs = (b.data ?? []) as Brief<MorningContent & MiddayContent & EveningContent>[];
     const m = briefs.find((x) => x.kind === "morning") ?? null;
     const ev = briefs.find((x) => x.kind === "evening") ?? null;
@@ -81,7 +92,7 @@ export default function Today({ data, initialMode }: { data: AssistantData; init
       ) : (
         <div key={mode} className="view-enter">
           {mode === "morning" ? (
-            <Morning brief={morning} midday={midday} thought={thought} direction={direction} events={events} data={data} />
+            <Morning brief={morning} midday={midday} thought={thought} direction={direction} events={events} feedback={feedback} data={data} />
           ) : (
             <EveningReview brief={evening} data={data} onConfirmed={load} />
           )}
@@ -97,6 +108,7 @@ function Morning({
   thought,
   direction,
   events,
+  feedback,
   data,
 }: {
   brief: Brief<MorningContent> | null;
@@ -104,6 +116,7 @@ function Morning({
   thought: Thought | null;
   direction: string | null;
   events: CalendarEvent[];
+  feedback: Feedback[];
   data: AssistantData;
 }) {
   const today = taipeiDate();
@@ -136,6 +149,9 @@ function Morning({
           {brief ? "今天沒有思考內容。" : "每天早上 7 點，這裡會先出現一則讓你從全局思考的內容，再來才是待辦。"}
         </p>
       )}
+
+      {/* 回饋也是思考的一部分，放在待辦之前 */}
+      <FeedbackList key={feedback.map((f) => f.id).join()} list={feedback} onTodoAdded={data.reload} />
 
       <Schedule events={events} slots={noon?.afternoon?.free_slots ?? c.free_slots} />
 

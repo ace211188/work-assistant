@@ -43,6 +43,20 @@ export type Thought = {
   comment: string | null;
 };
 
+// 助理對你寫下的東西給的回饋（每小時的排程寫入）
+export type Feedback = {
+  id: number;
+  source_type: "idea" | "thought_comment" | "reflection" | "discussion";
+  source_id: number;
+  source_text: string;
+  body: string;
+  question: string | null;
+  action: string | null;
+  action_todo_id: number | null;
+  dismissed_at: string | null;
+  created_at: string;
+};
+
 export type CalendarEvent = {
   id: number;
   calendar_name: string | null;

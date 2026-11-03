@@ -25,6 +25,20 @@ function sampleData(): Record<string, Row[]> {
       todo(7, "訂購節拍器三台", { category: "教學", status: "done", completed_at: now }),
     ],
     pa_inbox: [{ id: 1, text: "下週找美君討論寒假營隊", created_at: now, processed_at: null }],
+    pa_feedback: [
+      {
+        id: 1, source_type: "idea", source_id: 9, source_text: "寒假可以辦親子音樂營", created_at: now, dismissed_at: null, action_todo_id: null,
+        body: "這和你上週記的「家長常問寒假有沒有課」是同一件事：需求已經在了。親子營還有一個好處，家長在現場看到孩子上課，續報率通常比較高。",
+        question: "你想讓親子營帶來新生，還是讓現有學生的家長更投入？",
+        action: "問三位家長寒假有沒有興趣參加親子營",
+      },
+      {
+        id: 2, source_type: "thought_comment", source_id: 1, source_text: "停掉週末試聽有點捨不得，但真的太累了", created_at: now, dismissed_at: null, action_todo_id: null,
+        body: "捨不得通常代表它曾經有用。可以先看過去三個月週末試聽的報名率，如果明顯比平日低，停掉就不是損失，而是把力氣放回更有效的地方。",
+        question: null,
+        action: null,
+      },
+    ],
     pa_thoughts: [{
       id: 1, date: today, format: "question", topic: "經營與領導",
       title: "停止，比開始更難",
