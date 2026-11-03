@@ -8,6 +8,7 @@ import { currentSubscription, enablePush, pushSupported, sendTestPush } from "@/
 import type { Exception, Recurrence, WorkHour } from "@/lib/types";
 import Masthead from "./Masthead";
 
+const BASE = process.env.NODE_ENV === "production" ? "/work-assistant" : "";
 const BYDAY = ["SU", "MO", "TU", "WE", "TH", "FR", "SA"];
 const WEEK_ORDER = [1, 2, 3, 4, 5, 6, 0];
 
@@ -77,6 +78,7 @@ export default function Settings() {
     <div>
       <Masthead title="Settings" />
       <PushSection />
+      <WidgetSection />
       <WorkHours hours={hours} onChange={load} onRemove={(id) => remove("pa_work_hours", id)} />
       <Exceptions list={exceptions} onChange={load} onRemove={(id) => remove("pa_exceptions", id)} />
       <Recurrences list={recurrences} onChange={load} onRemove={(id) => remove("pa_recurrences", id)} />
@@ -142,7 +144,7 @@ function PushSection() {
     <>
       <h2 className="sec">Notifications</h2>
       <div className="card space-y-3">
-        <p className="leading-relaxed">早上 7 點和晚上 10 點，內容準備好時通知你。</p>
+        <p className="leading-relaxed">早上 7 點和晚上 10 點，內容準備好時通知你；中午 12 點只在下午的安排有變動時通知。</p>
         <div className="flex flex-wrap gap-2">
           <button onClick={enable} disabled={!pushSupported()} className="btn">
             {enabled ? "重新綁定這台裝置" : "開啟通知"}
@@ -156,6 +158,85 @@ function PushSection() {
             </button>
           )}
         </div>
+        {status && <p className="meta">{status}</p>}
+      </div>
+    </>
+  );
+}
+
+// iPhone 主畫面小工具（Scriptable）：金鑰在這裡產生、只顯示一次，資料庫只存雜湊
+function WidgetSection() {
+  const [key, setKey] = useState("");
+  const [script, setScript] = useState("");
+  const [lastUsed, setLastUsed] = useState<string | null | undefined>(undefined);
+  const [status, setStatus] = useState("");
+
+  useEffect(() => {
+    // 先把程式碼抓下來，按「複製」時才能在同一個點擊裡寫進剪貼簿（iPhone Safari 的限制）
+    fetch(`${BASE}/widget.js`).then((r) => r.text()).then(setScript).catch(() => {});
+    supabase
+      .from("pa_widget_keys")
+      .select("last_used_at, created_at")
+      .order("created_at", { ascending: false })
+      .limit(1)
+      .maybeSingle()
+      .then(({ data }) => setLastUsed(data ? (data.last_used_at ?? "") : null));
+  }, []);
+
+  async function generate() {
+    const bytes = crypto.getRandomValues(new Uint8Array(24));
+    const newKey = [...bytes].map((b) => b.toString(16).padStart(2, "0")).join("");
+    const digest = await crypto.subtle.digest("SHA-256", new TextEncoder().encode(newKey));
+    const hash = [...new Uint8Array(digest)].map((b) => b.toString(16).padStart(2, "0")).join("");
+    // 一次只留一把：舊的全部作廢
+    await supabase.from("pa_widget_keys").delete().gte("id", 0);
+    const { error } = await supabase.from("pa_widget_keys").insert({ key_hash: hash });
+    if (error) return setStatus(`產生失敗：${error.message}`);
+    setKey(newKey);
+    setLastUsed("");
+    setStatus("");
+  }
+
+  async function copy(value: string, done: string) {
+    try {
+      await navigator.clipboard.writeText(value);
+      setStatus(done);
+    } catch {
+      setStatus("沒辦法自動複製，請長按選取後複製。");
+    }
+  }
+
+  return (
+    <>
+      <h2 className="sec">Widget</h2>
+      <div className="card space-y-3">
+        <p className="leading-relaxed">在 iPhone 主畫面放一個小工具，顯示下一件該做的事、下一個行程和還剩幾件。</p>
+        <ol className="meta list-decimal space-y-1 pl-5 leading-relaxed">
+          <li>到 App Store 安裝免費的 Scriptable</li>
+          <li>按「複製程式碼」，在 Scriptable 按右上角＋新增腳本，貼上</li>
+          <li>按「產生金鑰」並複製，在 Scriptable 執行一次腳本時貼上</li>
+          <li>回主畫面長按 → 加入小工具 → Scriptable，編輯小工具選這個腳本</li>
+        </ol>
+        <div className="flex flex-wrap gap-2">
+          <button onClick={() => copy(script, "程式碼已複製。")} disabled={!script} className="btn-quiet">
+            複製程式碼
+          </button>
+          <button onClick={generate} className="btn">
+            {lastUsed === null ? "產生金鑰" : "重新產生金鑰"}
+          </button>
+        </div>
+        {key && (
+          <div className="space-y-2">
+            <p className="num break-all rounded-[4px] bg-fg px-3 py-2 text-[14px] text-ink">{key}</p>
+            <button onClick={() => copy(key, "金鑰已複製，貼到 Scriptable 就好。")} className="btn-quiet">
+              複製金鑰
+            </button>
+            <p className="meta">金鑰只會顯示這一次；重新產生會讓舊的失效。它只能讀今天的摘要，不能改任何東西。</p>
+          </div>
+        )}
+        {!key && lastUsed !== undefined && lastUsed !== null && (
+          <p className="meta">{lastUsed ? `小工具上次更新：${new Date(lastUsed).toLocaleString("zh-TW", { timeZone: "Asia/Taipei", hour12: false })}` : "已產生金鑰，小工具還沒連上。"}</p>
+        )}
         {status && <p className="meta">{status}</p>}
       </div>
     </>
