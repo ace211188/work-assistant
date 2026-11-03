@@ -20,6 +20,7 @@
 `select id, text, created_at from pa_inbox where processed_at is null order by created_at;`，逐筆判斷：
 
 - **要做的事** → 新增 `pa_todos`（title 用動詞開頭；有提到期限才填 due_date；有說哪天做才填 planned_date；category 從 招生、行政、老師、學生家長、財務、教學、場地、個人、其他 擇一；`urgency_ai` high／medium／low 和一句 `urgency_reason`），更新 inbox 的 `processed_at`、`todo_id`。新增的待辦 id 記進 `new_todo_ids`
+- **要助理做的事**（「幫我寫…」「整理一份…給我」「查一下…」）→ **不要變成他的待辦**，inbox 標記 processed（todo_id 留空）。回饋排程會把它做完、成品放在 App 的 Replies
 - **表示某件事做完了**且明確對應到一筆未完成待辦 → 那筆待辦 `status='done'`，inbox 標記 processed
 - **只是想法** → inbox 標記 processed（todo_id 留空），放進 `ideas`
 

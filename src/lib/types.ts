@@ -49,7 +49,10 @@ export type Feedback = {
   source_type: "idea" | "thought_comment" | "reflection" | "discussion";
   source_id: number;
   source_text: string;
+  kind: "reply" | "request" | "skip";
   body: string;
+  document_title: string | null;
+  document: string | null;
   question: string | null;
   action: string | null;
   action_todo_id: number | null;
