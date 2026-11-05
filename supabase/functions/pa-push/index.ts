@@ -9,6 +9,7 @@
 //   { action: "subscribe", subscription }      → 保存這台裝置的訂閱（需登入，記在該使用者名下）
 //   { action: "test", endpoint }               → 只發一則測試通知給這台裝置
 //   { action: "brief", brief_id }              → 早、午、晚內容寫入時由資料庫觸發，通知擁有者的所有裝置（中午只在有 push 時通知）
+//   { action: "assignment", assignment_id }    → 交辦完成或需要你回覆時由資料庫觸發（每個狀態只通知一次）
 // 群發只限「剛寫入、還沒通知過」的早晚內容，每則最多通知一次，所以不需要另外的密鑰。
 
 import "jsr:@supabase/functions-js/edge-runtime.d.ts";
@@ -43,7 +44,7 @@ Deno.serve(async (req) => {
     Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!,
   );
 
-  const { action, subscription, endpoint, brief_id } = await req.json().catch(() => ({}));
+  const { action, subscription, endpoint, brief_id, assignment_id } = await req.json().catch(() => ({}));
 
   if (action === "config") return json({ vapidPublic });
 
@@ -85,6 +86,8 @@ Deno.serve(async (req) => {
       ? { title: "早安 🌅", body: "今天的思考題和行程整理好了" }
       : brief.kind === "midday"
       ? { title: "下午重排好了 ☀️", body: "上午記下的事整理好了，看看下午的安排" }
+      : brief.kind === "weekly"
+      ? { title: "這週的週報 📋", body: "這週做了什麼、需要你決定什麼", url: "https://ace211188.github.io/work-assistant/#assistant" }
       : { title: "今天辛苦了 🌙", body: "回顧和明天的排程草稿好了，花 5 分鐘看看" };
     const payload = JSON.stringify({ ...fallback, ...(brief.content?.push ?? {}) });
 
@@ -112,6 +115,41 @@ Deno.serve(async (req) => {
       ? `${brief.kind} sent ${sent}`
       : `${brief.kind} sent 0：${subs?.length ? failures.join("；") : "沒有綁定帳號的裝置"}`;
     await supabase.from("pa_healthcheck").insert({ source: "push-brief", note });
+    return json({ ok: true, sent });
+  }
+
+  // 交辦完成、或助理需要你回覆：每個狀態只通知一次
+  if (action === "assignment") {
+    const { data: a } = await supabase
+      .from("pa_assignments")
+      .select("id, user_id, title, status, notified_status")
+      .eq("id", assignment_id ?? 0)
+      .maybeSingle();
+    if (!a || !["done", "needs_input"].includes(a.status) || a.notified_status === a.status) return json({ ok: true, skipped: true });
+    const claim = supabase.from("pa_assignments").update({ notified_status: a.status }).eq("id", a.id);
+    const { data: claimed } = await (a.notified_status === null
+      ? claim.is("notified_status", null)
+      : claim.eq("notified_status", a.notified_status)
+    ).select("id");
+    if (!claimed?.length) return json({ ok: true, skipped: true });
+
+    const payload = JSON.stringify({
+      title: a.status === "done" ? "助理：做好了 ✅" : "助理有事想問你 💬",
+      body: a.title,
+      url: "https://ace211188.github.io/work-assistant/#assistant",
+    });
+    const { data: subs } = await supabase.from("pa_push_subscriptions").select("endpoint, subscription").eq("user_id", a.user_id);
+    let sent = 0;
+    for (const s of subs ?? []) {
+      try {
+        await webpush.sendNotification(s.subscription, payload);
+        sent++;
+      } catch (e) {
+        const status = (e as { statusCode?: number }).statusCode;
+        if (status === 404 || status === 410) await supabase.from("pa_push_subscriptions").delete().eq("endpoint", s.endpoint);
+      }
+    }
+    await supabase.from("pa_healthcheck").insert({ source: "push-assignment", note: `${a.status} sent ${sent}` });
     return json({ ok: true, sent });
   }
 

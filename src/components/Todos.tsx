@@ -8,6 +8,7 @@ import { effectiveUrgency, sortByUrgency, URGENCY_LABEL, type AssistantData } fr
 import type { Todo, TodoStatus, Urgency } from "@/lib/types";
 import Masthead from "./Masthead";
 import TodoRow from "./TodoRow";
+import Assistant from "./Assistant";
 
 const FILTERS: { key: TodoStatus; label: string }[] = [
   { key: "open", label: "Open" },
@@ -15,7 +16,39 @@ const FILTERS: { key: TodoStatus; label: string }[] = [
   { key: "dropped", label: "Dropped" },
 ];
 
-export default function Todos({ data }: { data: AssistantData }) {
+export default function Todos({ data, initialMode = "mine" }: { data: AssistantData; initialMode?: "mine" | "assistant" }) {
+  const [mode, setMode] = useState(initialMode);
+
+  return (
+    <div>
+      <Masthead
+        title="Tasks"
+        subtitle={mode === "mine" ? `${data.todos.filter((t) => t.status === "open").length} open` : "交給助理"}
+        aside={
+          <div role="tablist" aria-label="我的待辦或交給助理" className="relative grid shrink-0 grid-cols-2 pb-1">
+            {(["mine", "assistant"] as const).map((m) => (
+              <button key={m} role="tab" aria-selected={mode === m} onClick={() => setMode(m)} className="meta min-h-11 px-2">
+                {m === "mine" ? "Mine" : "Assistant"}
+              </button>
+            ))}
+            <span
+              aria-hidden
+              className="slide-indicator pointer-events-none absolute bottom-[14px] left-0 flex w-1/2 justify-center"
+              style={{ transform: `translateX(${mode === "mine" ? 0 : 100}%)` }}
+            >
+              <span className="h-px w-12 bg-fg" />
+            </span>
+          </div>
+        }
+      />
+      <div key={mode} className="view-enter">
+        {mode === "mine" ? <MyTodos data={data} /> : <Assistant />}
+      </div>
+    </div>
+  );
+}
+
+function MyTodos({ data }: { data: AssistantData }) {
   const [filter, setFilter] = useState<TodoStatus>("open");
   const [category, setCategory] = useState<string>("");
   const [editing, setEditing] = useState<number | null>(null);
@@ -25,8 +58,7 @@ export default function Todos({ data }: { data: AssistantData }) {
   const toggle = (t: Todo) => data.updateTodo(t.id, { status: t.status === "done" ? "open" : "done" });
 
   return (
-    <div>
-      <Masthead title="Tasks" subtitle={`${data.todos.filter((t) => t.status === "open").length} open`} />
+    <>
 
       {data.inbox.length > 0 && (
         <>
@@ -35,7 +67,7 @@ export default function Todos({ data }: { data: AssistantData }) {
             <span className="num not-italic">{data.inbox.length}</span>
           </h2>
           <div className="card py-1">
-            <p className="meta pt-2 leading-relaxed">早上 7 點或晚上 10 點整理時，會判斷日期、分類和緊急程度。</p>
+            <p className="meta pt-2 leading-relaxed">助理每 2 小時整理一次：判斷日期、分類和緊急程度；「幫我…」的會交給助理做。</p>
             <ul className="divide-y divide-line">
               {data.inbox.map((i) => (
                 <li key={i.id} className="flex items-center gap-2">
@@ -94,7 +126,7 @@ export default function Todos({ data }: { data: AssistantData }) {
         {list.length === 0 && <p className="py-3">這裡是空的。</p>}
       </div>
       <p className="meta mt-3 leading-relaxed">點一下待辦可以改緊急程度、日期和分類；助理會從你的修改學習你的習慣。</p>
-    </div>
+    </>
   );
 }
 

@@ -43,7 +43,39 @@ export type Thought = {
   comment: string | null;
 };
 
-// 助理對你寫下的東西給的回饋（每小時的排程寫入）
+// 交給助理（員工）的事
+export type AssignmentStatus = "queued" | "working" | "needs_input" | "done" | "cancelled";
+export type Assignment = {
+  id: number;
+  title: string;
+  detail: string | null;
+  source: "app" | "inbox" | "feedback" | "duty";
+  duty_id: number | null;
+  status: AssignmentStatus;
+  result_title: string | null;
+  result: string | null;
+  created_at: string;
+  updated_at: string;
+  done_at: string | null;
+};
+export type AssignmentMessage = { id: number; assignment_id: number; author: "me" | "assistant"; body: string; created_at: string };
+
+// 助理的固定職掌
+export type Duty = {
+  id: number;
+  title: string;
+  instructions: string;
+  freq: "daily" | "weekly" | "monthly";
+  weekday: number | null;
+  monthday: number | null;
+  after_time: string;
+  active: boolean;
+  last_run_on: string | null;
+};
+export type StaffRule = { id: number; content: string; active: boolean; created_at: string };
+export type WeeklyContent = { report?: string };
+
+// 助理對你寫下的東西給的回饋（員工排程寫入）
 export type Feedback = {
   id: number;
   source_type: "idea" | "thought_comment" | "reflection" | "discussion";
@@ -56,6 +88,7 @@ export type Feedback = {
   question: string | null;
   action: string | null;
   action_todo_id: number | null;
+  assignment_id: number | null;
   dismissed_at: string | null;
   created_at: string;
 };
@@ -125,7 +158,7 @@ export type MiddayContent = {
 export type Brief<C> = {
   id: number;
   date: string;
-  kind: "morning" | "midday" | "evening";
+  kind: "morning" | "midday" | "evening" | "weekly";
   content: C;
   status: "draft" | "confirmed";
   created_at: string;

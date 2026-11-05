@@ -25,6 +25,29 @@ function sampleData(): Record<string, Row[]> {
       todo(7, "訂購節拍器三台", { category: "教學", status: "done", completed_at: now }),
     ],
     pa_inbox: [{ id: 1, text: "下週找美君討論寒假營隊", created_at: now, processed_at: null }],
+    pa_assignments: [
+      {
+        id: 1, title: "寒假班招生公告", detail: "幫我寫一封寒假班招生公告，強調小班制", source: "app", duty_id: null, status: "done",
+        result_title: "寒假班招生公告（初版）", result: "【序曲音樂學院｜寒假小班開課】\n\n寒假到了，讓孩子用音樂過一個不一樣的假期……\n\n上課日期：【日期】\n費用：【費用】",
+        created_at: now, updated_at: now, done_at: now,
+      },
+      {
+        id: 2, title: "每週排課檢查｜11/9", detail: null, source: "duty", duty_id: 1, status: "needs_input",
+        result_title: "本週排課檢查", result: "| 日期 | 時間 | 教室 | 問題 |\n|---|---|---|---|\n| 11/11（二）| 16:00 | 協奏曲 | 兩堂課重疊 |",
+        created_at: now, updated_at: now, done_at: null,
+      },
+      { id: 3, title: "查三家附近音樂教室的寒假方案", detail: "查三家附近音樂教室的寒假方案", source: "app", duty_id: null, status: "queued", result_title: null, result: null, created_at: now, updated_at: now, done_at: null },
+    ],
+    pa_assignment_messages: [
+      { id: 1, assignment_id: 1, author: "me", body: "幫我寫一封寒假班招生公告，強調小班制", created_at: now },
+      { id: 2, assignment_id: 1, author: "assistant", body: "寫好了，日期和費用用【】標出來，你補上就能發。", created_at: now },
+      { id: 3, assignment_id: 2, author: "assistant", body: "11/11 協奏曲 16:00 兩堂課重疊，是其中一堂要換教室嗎？", created_at: now },
+    ],
+    pa_duties: [
+      { id: 1, title: "每週排課檢查", instructions: "讀 Google 教室行事曆未來 7 天……", freq: "weekly", weekday: 1, monthday: null, after_time: "08:00:00", active: true, last_run_on: today },
+      { id: 2, title: "研究簡報", instructions: "挑一個他現在最在意的經營問題……", freq: "weekly", weekday: 3, monthday: null, after_time: "08:00:00", active: true, last_run_on: null },
+    ],
+    pa_staff_rules: [{ id: 1, content: "信件語氣要親切，不要太正式", active: true, created_at: now }],
     pa_feedback: [
       {
         id: 1, kind: "reply", source_type: "idea", source_id: 9, source_text: "寒假可以辦親子音樂營", created_at: now, dismissed_at: null, action_todo_id: null,
@@ -121,6 +144,8 @@ class Query implements PromiseLike<{ data: unknown; error: null }> {
   limit(n: number) { this.max = n; return this; }
   eq(k: string, v: unknown) { this.filters.push((r) => r[k] === v); return this; }
   is(k: string, v: unknown) { this.filters.push((r) => (r[k] ?? null) === v); return this; }
+  neq(k: string, v: unknown) { this.filters.push((r) => r[k] !== v); return this; }
+  in(k: string, v: unknown[]) { this.filters.push((r) => v.includes(r[k])); return this; }
   gte(k: string, v: string) { this.filters.push((r) => String(r[k]) >= v); return this; }
   lte(k: string, v: string) { this.filters.push((r) => String(r[k]) <= v); return this; }
   maybeSingle() { this.mode = "one"; return this; }

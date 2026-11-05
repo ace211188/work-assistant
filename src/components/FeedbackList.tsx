@@ -80,6 +80,11 @@ export default function FeedbackList({ list, onTodoAdded }: { list: Feedback[]; 
               </p>
             )}
             <div className="mt-3 flex flex-wrap items-center gap-2">
+              {f.assignment_id && (
+                <button onClick={() => (window.location.hash = "#assistant")} className="btn-quiet">
+                  看成品
+                </button>
+              )}
               {f.action &&
                 (f.action_todo_id ? (
                   <span className="meta">已加成待辦</span>

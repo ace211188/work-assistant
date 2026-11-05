@@ -18,17 +18,27 @@ export default function Home() {
   const data = useAssistantData(owner === "owner");
   const [tab, setTab] = useState<Tab>("today");
   const [todayMode, setTodayMode] = useState<"morning" | "evening" | undefined>();
+  const [todosMode, setTodosMode] = useState<"mine" | "assistant">("mine");
 
   useEffect(() => {
     if ("serviceWorker" in navigator) {
       navigator.serviceWorker.register(`${BASE}/sw.js`, { scope: `${BASE}/` }).catch(() => {});
     }
-    // 網址的 #tasks／#settings／#morning／#evening 直接開到那個畫面（例如晚上的推播點開就是回顧）
-    const hash = window.location.hash.slice(1);
-    // eslint-disable-next-line react-hooks/set-state-in-effect
-    if (hash === "tasks") setTab("todos");
-    else if (hash === "settings") setTab("settings");
-    else if (hash === "morning" || hash === "evening") setTodayMode(hash);
+    // 網址的 #tasks／#assistant／#settings／#morning／#evening 直接開到那個畫面（例如推播點開）
+    const applyHash = () => {
+      const hash = window.location.hash.slice(1);
+      if (hash === "tasks" || hash === "assistant") {
+        setTab("todos");
+        setTodosMode(hash === "assistant" ? "assistant" : "mine");
+      } else if (hash === "settings") setTab("settings");
+      else if (hash === "morning" || hash === "evening") {
+        setTab("today");
+        setTodayMode(hash);
+      }
+    };
+    applyHash();
+    window.addEventListener("hashchange", applyHash);
+    return () => window.removeEventListener("hashchange", applyHash);
   }, []);
 
   useEffect(() => {
@@ -52,9 +62,9 @@ export default function Home() {
   return (
     <div className="mx-auto max-w-xl px-5 pt-[max(20px,env(safe-area-inset-top))] pb-36">
       {/* key 換了就重新播放淡入動畫 */}
-      <div key={tab} className="view-enter">
+      <div key={`${tab}-${todayMode}-${todosMode}`} className="view-enter">
         {tab === "today" && <Today data={data} initialMode={todayMode} />}
-        {tab === "todos" && <Todos data={data} />}
+        {tab === "todos" && <Todos data={data} initialMode={todosMode} />}
         {tab === "settings" && <Settings />}
       </div>
       <BottomBar tab={tab} onTab={setTab} data={data} />

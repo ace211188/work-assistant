@@ -29,7 +29,10 @@ self.addEventListener("notificationclick", (event) => {
   const url = (event.notification.data && event.notification.data.url) || HOME;
   event.waitUntil(
     self.clients.matchAll({ type: "window" }).then((list) => {
-      for (const c of list) if (c.url.startsWith(HOME) && "focus" in c) return c.focus();
+      // App 已經開著：切到通知指定的畫面（例如 #assistant）再帶到前面
+      for (const c of list) {
+        if (c.url.startsWith(HOME) && "focus" in c) return (url !== HOME && "navigate" in c ? c.navigate(url) : Promise.resolve(c)).then((w) => (w || c).focus());
+      }
       return self.clients.openWindow(url);
     })
   );

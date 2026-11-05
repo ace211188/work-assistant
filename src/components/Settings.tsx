@@ -5,7 +5,7 @@ import { IconX } from "@tabler/icons-react";
 import { supabase } from "@/lib/supabase";
 import { dateLabel, hhmm, taipeiDate, WEEKDAYS } from "@/lib/time";
 import { currentSubscription, enablePush, pushSupported, sendTestPush } from "@/lib/push";
-import type { Exception, Recurrence, WorkHour } from "@/lib/types";
+import type { Duty, Exception, Recurrence, StaffRule, WorkHour } from "@/lib/types";
 import Masthead from "./Masthead";
 
 const BASE = process.env.NODE_ENV === "production" ? "/work-assistant" : "";
@@ -78,6 +78,7 @@ export default function Settings() {
     <div>
       <Masthead title="Settings" />
       <PushSection />
+      <StaffSection />
       <WidgetSection />
       <WorkHours hours={hours} onChange={load} onRemove={(id) => remove("pa_work_hours", id)} />
       <Exceptions list={exceptions} onChange={load} onRemove={(id) => remove("pa_exceptions", id)} />
@@ -159,6 +160,139 @@ function PushSection() {
           )}
         </div>
         {status && <p className="meta">{status}</p>}
+      </div>
+    </>
+  );
+}
+
+const dutyWhen = (d: Pick<Duty, "freq" | "weekday" | "monthday" | "after_time">) =>
+  `${d.freq === "daily" ? "每天" : d.freq === "weekly" ? `每週${WEEKDAYS[d.weekday ?? 1]}` : `每月 ${d.monthday} 號`} ${hhmm(d.after_time)} 後`;
+
+// 助理（員工）的固定職掌和工作守則
+function StaffSection() {
+  const [duties, setDuties] = useState<Duty[]>([]);
+  const [rules, setRules] = useState<StaffRule[]>([]);
+  const [editing, setEditing] = useState<number | null>(null);
+  const [text, setText] = useState("");
+  const [rule, setRule] = useState("");
+  const [form, setForm] = useState({ title: "", weekday: "1", instructions: "" });
+
+  const load = useCallback(async () => {
+    const [d, r] = await Promise.all([
+      supabase.from("pa_duties").select("*").order("id"),
+      supabase.from("pa_staff_rules").select("*").eq("active", true).order("created_at"),
+    ]);
+    setDuties((d.data as Duty[]) ?? []);
+    setRules((r.data as StaffRule[]) ?? []);
+  }, []);
+
+  useEffect(() => {
+    // 載入職掌和守則（非同步，結果回來才更新狀態）
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    load();
+  }, [load]);
+
+  async function patchDuty(id: number, values: Partial<Duty>) {
+    await supabase.from("pa_duties").update(values).eq("id", id);
+    load();
+  }
+
+  async function addDuty(e: React.FormEvent) {
+    e.preventDefault();
+    if (!form.title.trim() || !form.instructions.trim()) return;
+    const daily = form.weekday === "daily";
+    await supabase.from("pa_duties").insert({
+      title: form.title.trim(),
+      instructions: form.instructions.trim(),
+      freq: daily ? "daily" : "weekly",
+      weekday: daily ? null : Number(form.weekday),
+    });
+    setForm({ title: "", weekday: "1", instructions: "" });
+    load();
+  }
+
+  async function addRule(e: React.FormEvent) {
+    e.preventDefault();
+    if (!rule.trim()) return;
+    await supabase.from("pa_staff_rules").insert({ content: rule.trim() });
+    setRule("");
+    load();
+  }
+
+  return (
+    <>
+      <h2 className="sec">Assistant</h2>
+      <div className="card space-y-3">
+        <p className="leading-relaxed">助理固定負責的工作，時間到就自己做，做好放在「Tasks → Assistant」並通知你。每週五傍晚交週報。</p>
+        <ul className="divide-y divide-line">
+          {duties.map((d) => (
+            <li key={d.id} className="py-2">
+              <div className="flex items-center gap-2">
+                <button onClick={() => { setEditing(editing === d.id ? null : d.id); setText(d.instructions); }} className="min-h-11 min-w-0 flex-1 text-left">
+                  <span className={`block leading-snug ${d.active ? "" : "line-through decoration-1"}`}>{d.title}</span>
+                  <span className="meta block">
+                    {dutyWhen(d)}
+                    {d.last_run_on ? `　上次 ${dateLabel(d.last_run_on)}` : ""}
+                  </span>
+                </button>
+                <button onClick={() => patchDuty(d.id, { active: !d.active })} aria-pressed={d.active} className="btn-quiet shrink-0">
+                  {d.active ? "開" : "關"}
+                </button>
+              </div>
+              {editing === d.id && (
+                <div className="mt-2 space-y-2">
+                  <textarea value={text} onChange={(e) => setText(e.target.value)} rows={5} aria-label={`「${d.title}」的工作說明`} className="field leading-[1.8]" />
+                  <button onClick={() => patchDuty(d.id, { instructions: text.trim() || d.instructions }).then(() => setEditing(null))} className="btn">
+                    儲存
+                  </button>
+                </div>
+              )}
+            </li>
+          ))}
+        </ul>
+        <form onSubmit={addDuty} className="space-y-2 border-t border-line pt-3">
+          <p className="meta">新增一項職掌</p>
+          <div className="flex gap-2">
+            <input value={form.title} onChange={(e) => setForm({ ...form, title: e.target.value })} placeholder="名稱，例如：月底帳務整理" aria-label="職掌名稱" className="field min-w-0 flex-1" />
+            <select value={form.weekday} onChange={(e) => setForm({ ...form, weekday: e.target.value })} aria-label="什麼時候做" className="field w-auto">
+              <option value="daily">每天</option>
+              {[1, 2, 3, 4, 5, 6, 0].map((w) => (
+                <option key={w} value={w}>每週{WEEKDAYS[w]}</option>
+              ))}
+            </select>
+          </div>
+          <textarea value={form.instructions} onChange={(e) => setForm({ ...form, instructions: e.target.value })} rows={3} placeholder="要它做什麼、做到什麼程度" aria-label="工作說明" className="field" />
+          <button className="btn-quiet" disabled={!form.title.trim() || !form.instructions.trim()}>
+            新增職掌
+          </button>
+        </form>
+      </div>
+
+      <h2 className="sec">Work rules</h2>
+      <div className="card space-y-3">
+        <p className="meta leading-relaxed">你給助理的長期指示，它每次做事前都會先讀。例如「信件語氣要親切，不要太正式」。</p>
+        {rules.length > 0 && (
+          <ul className="divide-y divide-line">
+            {rules.map((r) => (
+              <li key={r.id} className="flex items-start gap-2">
+                <span className="min-w-0 flex-1 py-3 leading-[1.75]">{r.content}</span>
+                <button
+                  onClick={() => supabase.from("pa_staff_rules").update({ active: false }).eq("id", r.id).then(load)}
+                  aria-label={`移除守則「${r.content}」`}
+                  className="flex h-11 w-11 shrink-0 items-center justify-center"
+                >
+                  <IconX size={18} stroke={1.6} />
+                </button>
+              </li>
+            ))}
+          </ul>
+        )}
+        <form onSubmit={addRule} className="flex gap-2">
+          <input value={rule} onChange={(e) => setRule(e.target.value)} placeholder="新增一條守則" aria-label="新增守則" className="field min-w-0 flex-1" />
+          <button className="btn shrink-0" disabled={!rule.trim()}>
+            加入
+          </button>
+        </form>
       </div>
     </>
   );

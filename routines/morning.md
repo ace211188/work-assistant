@@ -37,7 +37,7 @@
   - `category`：招生、行政、老師、學生家長、財務、教學、場地、個人、其他 擇一
   - `urgency_ai`：high／medium／low，`urgency_reason` 用一句話說明理由
   - 然後更新該筆 inbox 的 `processed_at = now()`、`todo_id`
-- **要助理做的事**（「幫我寫…」「整理一份…給我」「查一下…」）→ **不要變成他的待辦**，inbox 標記 processed（todo_id 留空）。回饋排程會把它做完、成品放在 App 的 Replies
+- **要助理做的事**（「幫我寫…」「整理一份…給我」「查一下…」）→ **不要變成他的待辦**：新增一筆 `pa_assignments`（title 一句話說要做什麼、detail 放原文、source='inbox'、status='queued'），inbox 更新 `processed_at`、`assignment_id`。員工排程（每 2 小時）會把它做完
 - **表示某件事做完了**（例如「海報印好了」），且明確對應到一筆未完成待辦 → 把那筆待辦 `status='done'`，inbox 標記 processed
 - **只是想法、不是待辦** → inbox 標記 processed（todo_id 留空），放進今天內容的 `ideas`
 
