@@ -6,6 +6,7 @@
 
 - 資料庫：用 Supabase 連接器的 `execute_sql`，專案 id `gffemhrthwdnajdpkwsq`。只能讀寫 `public.pa_` 開頭的表格。
 - 這次**不需要讀 Google 行事曆**：早上已經同步過，Apple 行事曆由資料庫每 30 分鐘自動同步，直接讀 `pa_calendar_events` 就好。
+- 同一堂課常同時出現在 Apple「教課」（只寫學生名，如「子毅」）和 Google 教室行事曆（如「子毅/爵士鼓/宇群」）：同一時段（開始、結束都相同）且 Google 標題包含 Apple 標題的，視為同一筆，只算一次、用 Google 的標題，不要重複列出或重複扣空檔。
 - 寫入含使用者文字的資料時，用 `jsonb_to_recordset($j$[...]$j$::jsonb)` 或 dollar-quoting（`$t$...$t$`）避免引號問題。
 - 先跑 `TZ=Asia/Taipei date '+%F %H:%M %w'` 取得今天日期（TODAY）、現在時間（NOW）和星期幾（0=週日）。所有時間都以台北時間為準。
 - 先查 `select user_id from pa_profile limit 1;` 取得 USER_ID。查不到就寫一筆 healthcheck（source='routine-midday', note='no owner'）後結束。

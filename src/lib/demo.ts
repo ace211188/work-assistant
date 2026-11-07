@@ -79,9 +79,9 @@ function sampleData(): Record<string, Row[]> {
     }],
     pa_direction: [{ content: "今年讓序曲的招生不再靠我一個人。" }],
     pa_calendar_events: [
-      { id: 1, calendar_name: "協奏曲教室", title: "宇群・鋼琴個別課", start_at: at("14:00"), end_at: at("16:00"), all_day: false, involves_me: true, involves_me_override: null },
-      { id: 2, calendar_name: "賦格教室", title: "小提琴團體課", start_at: at("15:00"), end_at: at("16:30"), all_day: false, involves_me: false, involves_me_override: null },
-      { id: 3, calendar_name: "前奏曲教室", title: "兒童音感班", start_at: at("17:00"), end_at: at("18:00"), all_day: false, involves_me: false, involves_me_override: null },
+      { id: 1, source: "google", calendar_name: "協奏曲教室", title: "宇群・鋼琴個別課", start_at: at("14:00"), end_at: at("16:00"), all_day: false, involves_me: true, involves_me_override: null },
+      { id: 2, source: "google", calendar_name: "賦格教室", title: "小提琴團體課", start_at: at("15:00"), end_at: at("16:30"), all_day: false, involves_me: false, involves_me_override: null },
+      { id: 3, source: "google", calendar_name: "前奏曲教室", title: "兒童音感班", start_at: at("17:00"), end_at: at("18:00"), all_day: false, involves_me: false, involves_me_override: null },
     ],
     pa_briefs: [
       {

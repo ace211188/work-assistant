@@ -95,6 +95,7 @@ export type Feedback = {
 
 export type CalendarEvent = {
   id: number;
+  source: "apple" | "google";
   calendar_name: string | null;
   title: string | null;
   start_at: string;

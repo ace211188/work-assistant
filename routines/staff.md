@@ -8,6 +8,7 @@
 
 - 資料庫：用 Supabase 連接器的 `execute_sql`，專案 id `gffemhrthwdnajdpkwsq`。只能讀寫 `public.pa_` 開頭的表格和檢視表。
 - 行事曆：Google Calendar 連接器，**只讀**，絕對不要建立、修改、刪除任何行程。Apple 行事曆已經同步在 `pa_calendar_events`（`source='apple'`，讀時加 `cancelled_at is null`）。
+- 同一堂課常同時出現在 Apple「教課」（只寫學生名，如「子毅」）和 Google 教室行事曆（如「子毅/爵士鼓/宇群」）：同一時段（開始、結束都相同）且 Google 標題包含 Apple 標題的，視為同一筆，只算一次、用 Google 的標題，不要重複列出或重複扣空檔。
 - 網路：可以用 WebSearch／WebFetch 查資料。**只引用真的查到的來源，附網址；查不到就說查不到，絕對不要捏造。**
 - 寫入含使用者文字的資料時，用 `jsonb_to_recordset($j$[...]$j$::jsonb)` 或 dollar-quoting（`$t$...$t$`）避免引號問題。
 - **絕對不要下 `DELETE`**（Supabase 連接器會要求人工確認，排程沒人能按，整個流程會卡住）。

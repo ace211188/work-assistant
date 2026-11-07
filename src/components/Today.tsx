@@ -255,12 +255,34 @@ function PlanCard({ todo, onToggle, slot, reason }: { todo: Todo; onToggle: () =
   );
 }
 
+// 同一堂課常同時記在 Apple「教課」（只寫學生名，如「子毅」）和 Google 教室行事曆（如「子毅/爵士鼓/宇群」）。
+// 同一時段、Google 標題包含 Apple 標題就當成同一筆：留 Google 那筆（標題較完整），並算成你的行程。
+function mergeTwins(events: CalendarEvent[]) {
+  const sameTime = (a: CalendarEvent, b: CalendarEvent) =>
+    +new Date(a.start_at) === +new Date(b.start_at) && +new Date(a.end_at) === +new Date(b.end_at);
+  const twinned = new Set<number>();
+  const hidden = new Set<number>();
+  for (const a of events) {
+    const name = a.title?.trim();
+    if (a.source !== "apple" || !name) continue;
+    // 同時段的團班標題也可能含這個學生名（「C2/子毅,品言/樂理」），先配標成你的那筆
+    const candidates = events.filter((x) => x.source === "google" && !twinned.has(x.id) && sameTime(a, x) && (x.title ?? "").includes(name));
+    const g = candidates.find((x) => x.involves_me) ?? candidates[0];
+    if (g) {
+      twinned.add(g.id);
+      hidden.add(a.id);
+    }
+  }
+  return { visible: events.filter((e) => !hidden.has(e.id)), twinned };
+}
+
 function Schedule({ events, slots }: { events: CalendarEvent[]; slots?: MorningContent["free_slots"] }) {
   const [list, setList] = useState(events);
   const [showClassroom, setShowClassroom] = useState(false);
-  const mine = (e: CalendarEvent) => e.involves_me_override ?? e.involves_me;
-  const myEvents = list.filter(mine);
-  const classroom = list.filter((e) => !mine(e));
+  const { visible, twinned } = mergeTwins(list);
+  const mine = (e: CalendarEvent) => e.involves_me_override ?? (e.involves_me || twinned.has(e.id));
+  const myEvents = visible.filter(mine);
+  const classroom = visible.filter((e) => !mine(e));
 
   async function setMine(e: CalendarEvent, value: boolean) {
     setList((prev) => prev.map((x) => (x.id === e.id ? { ...x, involves_me_override: value } : x)));
