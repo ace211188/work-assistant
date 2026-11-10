@@ -7,6 +7,7 @@ import { dayRange, hhmm, taipeiDate, taipeiHour } from "@/lib/time";
 import { sortByUrgency, type AssistantData } from "@/lib/useData";
 import type { Brief, CalendarEvent, EveningContent, Feedback, MiddayContent, MorningContent, Thought, Todo } from "@/lib/types";
 import FeedbackList from "./FeedbackList";
+import RunNow from "./RunNow";
 import Masthead, { englishDate } from "./Masthead";
 import ThoughtCard from "./ThoughtCard";
 import TodoRow from "./TodoRow";
@@ -62,6 +63,16 @@ export default function Today({ data, initialMode }: { data: AssistantData; init
     load();
   }, [load]);
 
+  // 按了「立即整理」之後，排程跑完會通知重新載入
+  useEffect(() => {
+    const refresh = () => {
+      load();
+      data.reload();
+    };
+    window.addEventListener("pa-refresh", refresh);
+    return () => window.removeEventListener("pa-refresh", refresh);
+  }, [load, data]);
+
   const { weekday, monthDay } = englishDate(today);
 
   return (
@@ -86,6 +97,7 @@ export default function Today({ data, initialMode }: { data: AssistantData; init
           </div>
         }
       />
+      <RunNow className="mt-3" />
 
       {!loaded ? (
         <p className="meta py-16">Loading…</p>

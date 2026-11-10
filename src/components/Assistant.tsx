@@ -4,6 +4,7 @@ import { useCallback, useEffect, useState } from "react";
 import { IconChevronDown } from "@tabler/icons-react";
 import { supabase } from "@/lib/supabase";
 import type { Assignment, AssignmentMessage, AssignmentStatus, Brief, WeeklyContent } from "@/lib/types";
+import RunNow from "./RunNow";
 
 const STATUS_LABEL: Record<AssignmentStatus, string> = {
   queued: "排隊中",
@@ -51,6 +52,12 @@ export default function Assistant() {
     // 載入交辦（非同步，結果回來才更新狀態）
     // eslint-disable-next-line react-hooks/set-state-in-effect
     load();
+  }, [load]);
+
+  // 按了「立即整理」之後，排程跑完會通知重新載入
+  useEffect(() => {
+    window.addEventListener("pa-refresh", load);
+    return () => window.removeEventListener("pa-refresh", load);
   }, [load]);
 
   async function assign(e: React.FormEvent) {
@@ -104,9 +111,10 @@ export default function Assistant() {
           <button className="btn" disabled={!draft.trim()}>
             交給助理
           </button>
-          <span className="meta">每 2 小時處理一次，做好會通知你</span>
+          <span className="meta">每 2 小時處理一次；急的話交辦完按「立即整理」</span>
         </div>
       </form>
+      <RunNow className="mt-3" />
 
       {weekly?.content.report &&<WeeklyReport report={weekly.content.report} date={weekly.date} />}
 
